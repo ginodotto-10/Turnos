@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="description" content="Reservá tu turno online"/>
+<title>Reservar turno - Est&#233;tica &amp; Bienestar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://dbdbsjlkhbugltevwdga.supabase.co"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--g1:#1B4332;--g2:#2D6A4F;--g3:#52B788;--g4:#95D5B2;--g5:#D8F3DC;--acc:#F4A261;--bg:#F4F7F5;--white:#fff;--txt:#1A2E22;--muted:#5A7A65;--border:rgba(45,106,79,0.12);}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
+/* NAV */
+nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:12px;}
+.nav-back{background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;text-decoration:none;flex-shrink:0;}
+.nav-info h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#fff;}
+.nav-info p{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
+/* STEPS */
+.steps-wrap{background:var(--white);padding:12px 20px;border-bottom:0.5px solid var(--border);}
+.steps-bar{display:flex;gap:0;max-width:400px;margin:0 auto;}
+.step-item{flex:1;text-align:center;font-size:10px;color:var(--muted);border-bottom:2px solid transparent;padding-bottom:8px;transition:all 0.2s;}
+.step-item.active{color:var(--g2);border-bottom:2px solid var(--g2);font-weight:500;}
+.step-item.done{color:var(--g3);border-bottom:2px solid var(--g3);}
+.step-num{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--bg);align-items:center;justify-content:center;font-size:11px;font-weight:500;margin-bottom:3px;transition:all 0.2s;}
+.step-item.active .step-num{background:var(--g2);color:#fff;}
+.step-item.done .step-num{background:var(--g3);color:#fff;}
+/* BODY */
+.body-wrap{max-width:480px;margin:0 auto;padding:20px 20px 40px;}
+.step-panel{display:none;animation:fu 0.3s ease both;}
+.step-panel.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+/* CARDS */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;}
+.card-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--txt);margin-bottom:4px;}
+.card-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+/* SERVICIOS */
+.srv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.srv-tile{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:14px 10px;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent;}
+.srv-tile:hover{border-color:var(--g3);background:var(--white);transform:translateY(-2px);box-shadow:0 6px 20px rgba(45,106,79,0.12);}
+.srv-tile:active{transform:scale(0.97);}
+.srv-tile.sel{border-color:var(--g2);background:var(--g5);}
+.srv-tile.sel:hover{border-color:var(--g2);background:var(--g5);transform:translateY(-2px);}
+.srv-tile-ic{width:34px;height:34px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--g2);margin-bottom:8px;border:0.5px solid var(--border);}
+.srv-tile h4{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px;}
+.srv-tile .dur{font-size:11px;color:var(--muted);}
+.srv-tile .pr{font-size:14px;font-weight:600;color:var(--g2);margin-top:6px;}
+/* CALENDARIO */
+.cal-card{background:var(--white);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.cal-head span{font-size:14px;font-weight:500;color:var(--txt);}
+.cal-arr{background:var(--bg);border:0.5px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:15px;color:var(--txt);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:all 0.18s;}
+.cal-arr:hover{background:var(--g2);color:#fff;border-color:var(--g2);}
+.wk-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+.wk-day{text-align:center;padding:7px 2px;border-radius:10px;cursor:pointer;transition:all 0.18s;border:0.5px solid transparent;-webkit-tap-highlight-color:transparent;}
+.wk-day .dn{font-size:9px;color:var(--muted);}
+.wk-day .dd{font-size:13px;font-weight:500;color:var(--txt);}
+.wk-day:hover:not(.past){background:var(--g5);border-color:var(--g3);}
+.wk-day.past{opacity:0.3;cursor:default;}
+.wk-day.today .dd{color:var(--g2);}
+.wk-day.sel-day{background:var(--g2);border-color:var(--g2);}
+.wk-day.sel-day .dn,.wk-day.sel-day .dd{color:#fff;}
+.wk-day.sel-day:hover{background:var(--g2);border-color:var(--g2);}
+.wk-day.has-t .dd::after{content:'·';color:var(--acc);font-size:16px;line-height:0;vertical-align:-4px;margin-left:1px;}
+.wk-day.past.feriado,.wk-day.feriado{background:#fff!important;border-color:var(--border)!important;opacity:1!important;cursor:default;}
+.wk-day.past.feriado .dn,.wk-day.feriado .dn{color:var(--muted);}
+.wk-day.past.feriado .dd,.wk-day.feriado .dd{color:var(--muted)!important;font-weight:700!important;text-decoration:line-through;}
+.feriado-lbl{display:block;font-size:8px;color:#E53935;font-weight:700;text-transform:uppercase;letter-spacing:0.02em;margin-top:2px;}
+.wk-day.past.feriado:hover,.wk-day.feriado:hover{background:#fff!important;transform:none!important;}
+.slots-lbl{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.slot{padding:9px 4px;text-align:center;border:0.5px solid var(--border);border-radius:10px;font-size:12px;cursor:pointer;transition:all 0.18s;background:var(--bg);color:var(--txt);-webkit-tap-highlight-color:transparent;}
+.slot:hover:not(.occ){border-color:var(--g2);color:var(--g2);background:var(--g5);transform:translateY(-1px);}
+.slot.sel-slot{background:var(--g2);border-color:var(--g2);color:#fff;font-weight:500;}
+.slot.sel-slot:hover{background:var(--g2);transform:translateY(-1px);}
+.slot.occ{background:var(--bg);color:var(--muted);cursor:default;text-decoration:line-through;opacity:0.5;}
+/* RESUMEN */
+.resumen{background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:14px;padding:16px;margin-bottom:14px;}
+.resumen h3{font-size:13px;font-weight:500;color:rgba(255,255,255,0.7);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;}
+.sum-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:0.5px solid rgba(255,255,255,0.1);}
+.sum-row:last-child{border-bottom:none;font-weight:600;font-size:15px;padding-top:8px;}
+.sum-lbl{color:rgba(255,255,255,0.65);}
+.sum-val{color:#fff;}
+/* FORM */
+.fg{margin-bottom:13px;}
+.fg label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
+.fg input{width:100%;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;}
+.fg input:focus{outline:none;border-color:var(--g3);}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+/* BOTONES */
+.btn-main{width:100%;padding:14px;background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;}
+.btn-main:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 20px rgba(45,106,79,0.25);opacity:0.95;}
+.btn-main:active{opacity:0.9;}
+.btn-main:disabled{background:var(--border);color:var(--muted);cursor:default;}
+.btn-sec{padding:13px 18px;background:var(--bg);border:0.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;cursor:pointer;color:var(--txt);flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all 0.18s;}
+.btn-sec:hover{border-color:var(--g3);background:var(--white);}
+.flex-row{display:flex;gap:10px;}
+.flex-row .btn-main{flex:1;}
+/* CONFIRMACIÓN */
+.confirm-wrap{text-align:center;padding:20px 0;}
+.check-big{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--g2),var(--g3));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:pop 0.45s ease both;}
+.check-big svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2.5;}
+.confirm-wrap h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--txt);margin-bottom:6px;}
+.confirm-wrap p{font-size:14px;color:var(--muted);margin-bottom:20px;}
+.btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;margin-bottom:10px;}
+.btn-nuevo{width:100%;padding:12px;background:transparent;border:0.5px solid var(--border);color:var(--muted);border-radius:12px;font-size:13px;font-family:inherit;cursor:pointer;}
+.btn-volver-inicio{width:100%;padding:12px;background:var(--g5);border:none;color:var(--g1);border-radius:12px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;margin-top:8px;}
+/* LOADING */
+.page-loading{position:fixed;inset:0;background:var(--g1);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;transition:opacity 0.4s;}
+.page-loading.hide{opacity:0;pointer-events:none;}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;}
+.page-loading p{color:rgba(255,255,255,0.7);font-size:13px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-msg{background:#FFF3F3;border:1px solid #FFCDD2;color:#C62828;border-radius:10px;padding:11px 14px;font-size:13px;margin-bottom:12px;display:none;line-height:1.5;}
+.error-msg.show{display:block;}
+.fg input.err{border-color:#E53935;}
+</style>
+</head>
+<body>
+
+<div class="page-loading" id="page-loading">
+  <div class="spinner"></div>
+  <p>Cargando servicios...</p>
+</div>
+
+<nav>
+  <a class="nav-back" href="index.html">&#8592;</a>
+  <div class="nav-info">
+    <h1 id="nav-nombre">Est&#233;tica &amp; Bienestar</h1>
+    <p>Reserv&#225; tu turno online</p>
+  </div>
+</nav>
+
+<div class="steps-wrap">
+  <div class="steps-bar">
+    <div class="step-item active" id="si1"><div class="step-num">1</div><div>Servicio</div></div>
+    <div class="step-item" id="si2"><div class="step-num">2</div><div>Fecha</div></div>
+    <div class="step-item" id="si3"><div class="step-num">3</div><div>Datos</div></div>
+    <div class="step-item" id="si4"><div class="step-num">4</div><div>Listo</div></div>
+  </div>
+</div>
+
+<div class="body-wrap">
+
+  <!-- PASO 1: SERVICIO -->
+  <div class="step-panel active" id="sp1">
+    <div class="card">
+      <div class="card-title">&#191;Qu&#233; servicio quer&#233;s?</div>
+      <div class="card-sub">Seleccion&#225; para ver los horarios disponibles.</div>
+      <div class="srv-grid" id="srv-grid">
+        <div style="grid-column:span 2;text-align:center;color:var(--muted);font-size:13px;padding:20px;">Cargando servicios...</div>
+      </div>
+    </div>
+    <button class="btn-main" id="btn-s1" disabled onclick="goStep(2)">Elegir fecha &#8594;</button>
+  </div>
+
+  <!-- PASO 2: FECHA -->
+  <div class="step-panel" id="sp2">
+    <div class="cal-card">
+      <div class="cal-head">
+        <button class="cal-arr" onclick="cChangeWeek(-1)">&#8249;</button>
+        <span id="c-week-lbl"></span>
+        <button class="cal-arr" onclick="cChangeWeek(1)">&#8250;</button>
+      </div>
+      <div class="wk-row" id="c-wk-row"></div>
+      <p class="slots-lbl" id="c-slots-lbl">Selecci&#243;n un d&#237;a para ver horarios</p>
+      <div class="slots-grid" id="c-slots"></div>
+    </div>
+    <div class="flex-row">
+      <button class="btn-sec" onclick="goStep(1)">&#8592; Volver</button>
+      <button class="btn-main" id="btn-s2" disabled onclick="goStep(3)">Continuar &#8594;</button>
+    </div>
+  </div>
+
+  <!-- PASO 3: DATOS -->
+  <div class="step-panel" id="sp3">
+    <div class="resumen" id="c-resumen"></div>
+    <div class="card">
+      <div class="card-title">Tus datos</div>
+      <div class="card-sub">Solo para confirmar y enviarte el recordatorio.</div>
+      <div class="r2">
+        <div class="fg"><label>Nombre</label><input id="c-nombre" type="text" placeholder="Mar&#237;a" maxlength="50" autocomplete="given-name"/></div>
+        <div class="fg"><label>Apellido</label><input id="c-apellido" type="text" placeholder="Gonz&#225;lez" maxlength="50" autocomplete="family-name"/></div>
+      </div>
+      <div class="fg"><label>Tel&#233;fono / WhatsApp</label><input id="c-tel" type="tel" placeholder="3462 400000" maxlength="20" autocomplete="tel"/></div>
+      <div class="fg"><label>Email</label><input id="c-email" type="email" placeholder="tu@email.com" maxlength="100" autocomplete="email"/></div>
+      <div class="fg"><label>&#191;Sos al&#233;rgica/o a algo? <span style="font-weight:400;text-transform:none;color:var(--muted);font-size:11px;">(opcional)</span></label><input id="c-notas" type="text" placeholder="Ej: al&#233;rgica al amon&#237;aco... (pod&#233;s dejarlo en blanco)" maxlength="200"/></div>
+      <div class="error-msg" id="form-error"></div>
+    </div>
+    <div class="flex-row">
+      <button class="btn-sec" onclick="goStep(2)">&#8592; Volver</button>
+      <button class="btn-main" id="btn-s3" onclick="confirmar()">Confirmar turno</button>
+    </div>
+  </div>
+
+  <!-- PASO 4: CONFIRMADO -->
+  <div class="step-panel" id="sp4">
+    <div class="confirm-wrap">
+      <div class="check-big"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h2>&#161;Turno confirmado!</h2>
+      <p>Te esperamos. Guard&#225; la confirmaci&#243;n por WhatsApp.</p>
+    </div>
+    <div class="resumen" id="c-confirm-detail"></div>
+    <button class="btn-wa" onclick="abrirWA()">
+      <svg width="16" height="16" fill="#fff" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Recibir confirmaci&#243;n por WhatsApp
+    </button>
+    <button class="btn-nuevo" onclick="resetForm()">Reservar otro turno</button>
+    <button class="btn-volver-inicio" onclick="window.location.href='index.html'">&#8592; Volver al inicio</button>
+  </div>
+
+</div>
+
+<script>
+var SB_URL='https://dbdbsjlkhbugltevwdga.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRiZGJzamxraGJ1Z2x0ZXZ3ZGdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjkwNjEsImV4cCI6MjA5MzY0NTA2MX0.swNF9b5GBo6znU4t-OARzVJuhdSTlCITNne84QaFxro';
+function sbH(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};}
+async function sbGet(t,f){
+  var r=await fetch(SB_URL+'/rest/v1/'+t+'?select=*'+(f?'&'+f:''),{headers:sbH()});
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error');}
+  return r.json();
+}
+async function sbPost(t,d){
+  var r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{...sbH(),'Prefer':'return=representation'},body:JSON.stringify(d)});
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error');}
+  return r.json();
+}
+function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
+function fmtF(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s;}}
+
+var TODAY=new Date().toISOString().split('T')[0];
+var DIAS=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
+var cWeekOff=0,cSelDate='',cSelSlot='',cSelSrv=null,lastT=null;
+var servicios=[],turnosOcupados=[],telNegocio='';
+var feriadosFechas=[];
+
+async function initApp(){
+  try {
+    var [dataSrv,dataCfg]=await Promise.all([
+      sbGet('servicios','activo=eq.true&order=id.asc'),
+      sbGet('configuracion','')
+    ]);
+    servicios=dataSrv.map(function(s){return{id:s.id,nombre:s.nombre,dur:s.duracion,precio:s.precio,ic:s.icono||s.nombre.slice(0,2).toUpperCase()};});
+    var cfg={};dataCfg.forEach(function(c){cfg[c.clave]=c.valor;});
+    if(cfg.nombre_negocio){
+      document.getElementById('nav-nombre').textContent=cfg.nombre_negocio;
+      document.title='Reservar turno - '+cfg.nombre_negocio;
+    }
+    if(cfg.telefono) telNegocio=cfg.telefono.replace(/\D/g,'');
+    if(cfg.horarios_config){
+      try{
+        var hc=JSON.parse(cfg.horarios_config);
+        if(hc.feriados) feriadosFechas=hc.feriados.map(function(f){return f.fecha;});
+      }catch(e){}
+    }
+    renderSrvGrid();
+
+    /* Leer servicio preseleccionado desde la landing */
+    try {
+      var presel=localStorage.getItem('srv_presel');
+      if(presel){
+        var srvPresel=JSON.parse(presel);
+        localStorage.removeItem('srv_presel');
+        /* Buscar el servicio en la lista y seleccionarlo */
+        var match=servicios.find(function(s){return s.id===srvPresel.id;});
+        if(match){
+          cSelSrv=match;
+          renderSrvGrid();
+          document.getElementById('btn-s1').disabled=false;
+          /* Ir directo al paso 2 con animación suave */
+          setTimeout(function(){goStep(2);},300);
+        }
+      }
+    } catch(e){}
+
+    renderCWeek();
+    var days=cGetWeek();
+    await cargarOcupados(new Date(days[0]).toISOString().split('T')[0],new Date(days[6]).toISOString().split('T')[0]);
+  } catch(e){console.error('Error iniciando:', e);}
+  var pl=document.getElementById('page-loading');
+  if(pl){pl.classList.add('hide');setTimeout(function(){pl.style.display='none';},400);}
+}
+
+async function cargarOcupados(desde,hasta){
+  try {
+    var data=await sbGet('turnos','fecha=gte.'+desde+'&fecha=lte.'+hasta+'&estado=eq.confirmado&select=fecha,hora');
+    turnosOcupados=data.map(function(t){return{fecha:t.fecha,hora:(t.hora||'').slice(0,5)};});
+    renderCSlots();
+  } catch(e){turnosOcupados=[];}
+}
+
+function renderSrvGrid(){
+  var g=document.getElementById('srv-grid');g.innerHTML='';
+  if(!servicios.length){g.innerHTML='<div style="grid-column:span 2;text-align:center;color:var(--muted);font-size:13px;padding:20px;">Sin servicios disponibles</div>';return;}
+  servicios.forEach(function(s){
+    var d=document.createElement('div');
+    d.className='srv-tile'+(cSelSrv&&cSelSrv.id===s.id?' sel':'');
+    d.innerHTML='<div class="srv-tile-ic">'+san(s.ic)+'</div>'
+      +'<h4>'+san(s.nombre)+'</h4>'
+      +'<div class="dur">'+parseInt(s.dur)+' min</div>'
+      +'<div class="pr">$'+parseInt(s.precio).toLocaleString('es-AR')+'</div>';
+    d.onclick=function(){cSelSrv=s;renderSrvGrid();document.getElementById('btn-s1').disabled=false;};
+    g.appendChild(d);
+  });
+}
+
+function cGetWeek(){
+  var base=new Date(TODAY+'T00:00:00');
+  var mon=new Date(base);mon.setDate(base.getDate()-base.getDay()+1+cWeekOff*7);
+  return Array.from({length:7},function(_,i){var d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
+}
+
+function renderCWeek(){
+  var days=cGetWeek();
+  var f=days[0],l=days[6];
+  document.getElementById('c-week-lbl').textContent=f.toLocaleDateString('es-AR',{day:'numeric',month:'short'})+' - '+l.toLocaleDateString('es-AR',{day:'numeric',month:'short'});
+  var row=document.getElementById('c-wk-row');row.innerHTML='';
+  days.forEach(function(d){
+    var ds=d.toISOString().split('T')[0];
+    var isPast=ds<TODAY;
+    var isFeriado=feriadosFechas.indexOf(ds)>=0;
+    var bloqueado=isPast||isFeriado;
+    var haT=turnosOcupados.some(function(t){return t.fecha===ds;});
+    var div=document.createElement('div');
+    div.className='wk-day'+(isPast&&!isFeriado?' past':'')+(isFeriado?' feriado':'')+(ds===TODAY?' today':'')+(ds===cSelDate?' sel-day':'')+(haT&&!bloqueado?' has-t':'');
+    div.innerHTML='<div class="dn" translate="no">'+san(DIAS[d.getDay()])+'</div><div class="dd">'+parseInt(d.getDate())+'</div>'+(isFeriado?'<span class="feriado-lbl" translate="no">FERIADO</span>':'');
+    if(!bloqueado) div.onclick=function(){cSelDate=ds;cSelSlot='';document.getElementById('btn-s2').disabled=true;renderCWeek();renderCSlots();};
+    row.appendChild(div);
+  });
+}
+
+function renderCSlots(){
+  var SLOTS=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+  var occ=turnosOcupados.filter(function(t){return t.fecha===cSelDate;}).map(function(t){return t.hora;});
+  document.getElementById('c-slots-lbl').textContent=cSelDate?'Horarios disponibles - '+fmtF(cSelDate):'Selecci\u00f3n un d\u00eda para ver horarios';
+  var wrap=document.getElementById('c-slots');wrap.innerHTML='';
+  SLOTS.forEach(function(s){
+    var o=occ.includes(s);
+    var div=document.createElement('div');
+    div.className='slot'+(o?' occ':'')+(s===cSelSlot?' sel-slot':'');
+    div.textContent=s;
+    if(!o) div.onclick=function(){cSelSlot=s;renderCSlots();document.getElementById('btn-s2').disabled=false;};
+    wrap.appendChild(div);
+  });
+}
+
+async function cChangeWeek(d){
+  cWeekOff+=d;renderCWeek();renderCSlots();
+  var days=cGetWeek();
+  await cargarOcupados(new Date(days[0]).toISOString().split('T')[0],new Date(days[6]).toISOString().split('T')[0]);
+}
+
+function goStep(n){
+  for(var i=1;i<=4;i++){
+    document.getElementById('sp'+i).classList.toggle('active',i===n);
+    var si=document.getElementById('si'+i);
+    si.classList.remove('active','done');
+    if(i===n) si.classList.add('active');
+    else if(i<n) si.classList.add('done');
+  }
+  if(n===3) renderResumen();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderResumen(){
+  if(!cSelSrv) return;
+  document.getElementById('c-resumen').innerHTML=
+    '<h3>Tu turno</h3>'
+    +'<div class="sum-row"><span class="sum-lbl">Servicio</span><span class="sum-val">'+san(cSelSrv.nombre)+'</span></div>'
+    +'<div class="sum-row"><span class="sum-lbl">Duraci\u00f3n</span><span class="sum-val">'+parseInt(cSelSrv.dur)+' min</span></div>'
+    +'<div class="sum-row"><span class="sum-lbl">Fecha</span><span class="sum-val">'+fmtF(cSelDate)+'</span></div>'
+    +'<div class="sum-row"><span class="sum-lbl">Hora</span><span class="sum-val">'+cSelSlot+'</span></div>'
+    +'<div class="sum-row"><span class="sum-lbl">Total</span><span class="sum-val">$'+parseInt(cSelSrv.precio).toLocaleString('es-AR')+'</span></div>';
+}
+
+function mostrarError(msg, inputId){
+  var el=document.getElementById('form-error');
+  el.textContent=msg;el.classList.add('show');
+  if(inputId){var inp=document.getElementById(inputId);if(inp){inp.classList.add('err');inp.focus();}}
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function limpiarError(){
+  var el=document.getElementById('form-error');
+  if(el){el.classList.remove('show');}
+  ['c-nombre','c-apellido','c-tel','c-email'].forEach(function(id){
+    var inp=document.getElementById(id);if(inp) inp.classList.remove('err');
+  });
+}
+
+async function confirmar(){
+  limpiarError();
+  var nombre=document.getElementById('c-nombre').value.trim();
+  var apellido=document.getElementById('c-apellido').value.trim();
+  var tel=document.getElementById('c-tel').value.trim();
+  var email=document.getElementById('c-email').value.trim();
+  var notas=document.getElementById('c-notas').value.trim();
+  if(!nombre){mostrarError('Por favor ingresá tu nombre.','c-nombre');return;}
+  if(!apellido){mostrarError('Por favor ingresá tu apellido.','c-apellido');return;}
+  if(!tel){mostrarError('Por favor ingresá tu teléfono o WhatsApp.','c-tel');return;}
+  if(!/^[\d\s\-\+\(\)]+$/.test(tel)){mostrarError('El teléfono ingresado no es válido. Usá solo números, por ejemplo: 3462 400000','c-tel');return;}
+  if(!email){mostrarError('Por favor ingresá tu email.','c-email');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){mostrarError('El email ingresado no es válido.','c-email');return;}
+  if(!cSelSrv||!cSelDate||!cSelSlot){mostrarError('Faltan datos del turno. Volvé al paso anterior.');return;}
+  var btn=document.getElementById('btn-s3');
+  btn.disabled=true;btn.textContent='Guardando...';
+  try {
+    var check=await sbGet('turnos','fecha=eq.'+cSelDate+'&hora=eq.'+cSelSlot+'&estado=eq.confirmado&select=id');
+    if(check&&check.length>0){
+      mostrarError('Ese horario acaba de ser tomado por otra persona. Por favor elegí otro horario.');
+      btn.disabled=false;btn.textContent='Confirmar turno';
+      goStep(2);return;
+    }
+    var cData=await sbPost('clientes',{nombre:nombre,apellido:apellido,telefono:tel.replace(/\D/g,'').slice(0,15),email:email||null,notas:notas||null});
+    await sbPost('turnos',{cliente_id:cData[0].id,servicio_id:cSelSrv.id,fecha:cSelDate,hora:cSelSlot,estado:'confirmado',precio:cSelSrv.precio});
+    lastT={nombre:nombre,apellido:apellido,tel:tel.replace(/\D/g,'').slice(0,15),servicio:cSelSrv.nombre,fecha:cSelDate,hora:cSelSlot,precio:cSelSrv.precio};
+    turnosOcupados.push({fecha:cSelDate,hora:cSelSlot});
+    document.getElementById('c-confirm-detail').innerHTML=
+      '<h3>Resumen</h3>'
+      +'<div class="sum-row"><span class="sum-lbl">Cliente</span><span class="sum-val">'+san(nombre)+' '+san(apellido)+'</span></div>'
+      +'<div class="sum-row"><span class="sum-lbl">Servicio</span><span class="sum-val">'+san(cSelSrv.nombre)+'</span></div>'
+      +'<div class="sum-row"><span class="sum-lbl">Fecha</span><span class="sum-val">'+fmtF(cSelDate)+'</span></div>'
+      +'<div class="sum-row"><span class="sum-lbl">Hora</span><span class="sum-val">'+cSelSlot+'</span></div>'
+      +'<div class="sum-row"><span class="sum-lbl">Total</span><span class="sum-val">$'+parseInt(cSelSrv.precio).toLocaleString('es-AR')+'</span></div>';
+    goStep(4);
+  } catch(e){
+    mostrarError('Hubo un error al guardar el turno. Intentá de nuevo.');
+    btn.disabled=false;btn.textContent='Confirmar turno';
+  }
+}
+
+function abrirWA(){
+  if(!lastT)return;
+  var msg=encodeURIComponent('Hola! Tu turno fue confirmado:\nServicio: '+lastT.servicio+'\nFecha: '+fmtF(lastT.fecha)+'\nHora: '+lastT.hora+'\nTotal: $'+parseInt(lastT.precio).toLocaleString('es-AR')+'\n\xA1Te esperamos!');
+  window.open('https://wa.me/54'+(telNegocio||lastT.tel)+'?text='+msg,'_blank');
+}
+
+function resetForm(){
+  cSelSrv=null;cSelDate='';cSelSlot='';lastT=null;cWeekOff=0;
+  ['c-nombre','c-apellido','c-tel','c-email','c-notas'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('btn-s1').disabled=true;
+  document.getElementById('btn-s2').disabled=true;
+  document.getElementById('btn-s3').disabled=false;
+  document.getElementById('btn-s3').textContent='Confirmar turno';
+  goStep(1);renderSrvGrid();renderCWeek();renderCSlots();
+}
+
+initApp();
+</script>
+</body>
+</html>

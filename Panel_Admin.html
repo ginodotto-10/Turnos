@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="description" content="Panel de administración - Estética y Bienestar"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Panel del local - Est&#233;tica &amp; Bienestar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://dbdbsjlkhbugltevwdga.supabase.co"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g1:#1B4332;--g2:#2D6A4F;--g3:#52B788;--g4:#95D5B2;--g5:#D8F3DC;
+  --acc:#F4A261;--acc2:#E76F51;--pur:#7F77DD;--blue:#378ADD;
+  --danger:#E24B4A;--warn:#BA7517;
+  --bg:#F4F7F5;--white:#fff;--txt:#1A2E22;--muted:#5A7A65;--border:rgba(45,106,79,0.12);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;-webkit-text-size-adjust:100%;}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,var(--g1),var(--g2),var(--g3));}
+.login-card{background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:360px;}
+.login-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--g2);text-align:center;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
+.fg input,.fg select{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--g3);}
+.fg textarea{width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);resize:vertical;min-height:60px;}
+.btn-login{width:100%;padding:14px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:inherit;cursor:pointer;}
+.login-err{display:none;background:#FCEBEB;border:0.5px solid #F09595;border-radius:8px;padding:10px 12px;font-size:13px;color:#791F1F;margin-bottom:12px;text-align:center;}
+.login-loading{display:none;text-align:center;padding:8px;font-size:13px;color:var(--muted);}
+#panel{display:none;}
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,var(--g1),var(--g2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.tb-left h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#fff;}
+.tb-left p{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
+.ing-hoy strong{display:block;font-size:18px;font-weight:600;color:#fff;text-align:right;}
+.ing-hoy span{font-size:10px;color:rgba(255,255,255,0.6);}
+.btn-logout{background:rgba(255,255,255,0.12);border:0.5px solid rgba(255,255,255,0.2);color:#fff;padding:7px 12px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;margin-left:10px;}
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:var(--bg);}
+.met{background:#fff;border-radius:10px;padding:12px 8px;text-align:center;border:0.5px solid var(--border);}
+.met .mv{font-size:20px;font-weight:600;}
+.met .ml{font-size:10px;color:var(--muted);margin-top:2px;}
+.mv-g{color:var(--g2);}
+.mv-a{color:var(--acc2);}
+.mv-p{color:var(--pur);}
+.mv-b{color:var(--blue);}
+/* TABS */
+.tabs{display:flex;gap:3px;padding:8px 12px;background:#fff;border-bottom:0.5px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:8px 12px;font-size:12px;font-weight:500;background:transparent;border:none;border-radius:8px;cursor:pointer;color:var(--muted);font-family:inherit;white-space:nowrap;-webkit-tap-highlight-color:transparent;}
+.tab.active{background:var(--g2);color:#fff;}
+.tab:not(.active):active{background:var(--g5);}
+/* SECCIONES */
+.sec{display:none;padding:12px;animation:fu 0.28s ease both;}
+.sec.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sec-hd h2{font-size:15px;font-weight:500;}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:8px;font-weight:500;}
+.b-ok{background:var(--g5);color:var(--g1);}
+.b-warn{background:#FAEEDA;color:#633806;}
+.b-aus{background:#FCEBEB;color:#791F1F;}
+.b-negra{background:#1A1A2E;color:#FF6B6B;}
+.negra-banner{background:#1A1A2E;border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.negra-banner h4{color:#FF6B6B;font-size:13px;margin-bottom:8px;}
+.negra-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid rgba(255,107,107,0.2);}
+.negra-row:last-child{border-bottom:none;}
+.negra-name{flex:1;font-size:13px;color:#fff;}
+.negra-cnt{font-size:11px;color:#FF6B6B;font-weight:600;}
+/* TURNO ROW */
+.tr{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border:0.5px solid var(--border);border-radius:12px;margin-bottom:7px;animation:fu 0.2s ease both;}
+.tr-hora{width:42px;text-align:center;flex-shrink:0;}
+.tr-hora .h{font-size:13px;font-weight:500;}
+.tr-hora .m{font-size:10px;color:var(--muted);}
+.tr-sep{width:1px;height:36px;background:var(--border);flex-shrink:0;}
+.tr-info{flex:1;min-width:0;}
+.tr-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tr-det{font-size:11px;color:var(--muted);}
+.tr-nota{font-size:11px;color:var(--warn);}
+.ia{padding:6px 9px;border:0.5px solid var(--border);border-radius:8px;background:transparent;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit;}
+/* CARDS */
+.card{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.card-title{font-size:14px;font-weight:500;margin-bottom:12px;color:var(--txt);}
+/* BUTTONS */
+.btn-main{width:100%;padding:13px;background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;}
+.btn-main:active{opacity:0.9;}
+.btn-sec{padding:10px 16px;border:0.5px solid var(--border);border-radius:10px;background:#fff;font-size:13px;cursor:pointer;font-family:inherit;color:var(--txt);}
+.btn-add{padding:8px 13px;background:var(--g2);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;}
+.btn-danger{padding:10px 14px;border:0.5px solid var(--danger);color:var(--danger);background:transparent;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn-warn-s{padding:10px 14px;border:0.5px solid var(--warn);color:var(--warn);background:transparent;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;}
+.btn-save{padding:9px 18px;background:var(--g2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+/* SEARCH */
+.search-box{width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;color:var(--txt);margin-bottom:10px;-webkit-appearance:none;}
+.search-box:focus{outline:none;border-color:var(--g3);}
+/* CLIENTES */
+.cr{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:0.5px solid var(--border);border-radius:12px;margin-bottom:7px;cursor:pointer;}
+.cr:active{border-color:var(--g3);}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.av-g{background:var(--g5);color:var(--g1);}
+.av-p{background:#EEEDFE;color:#3C3489;}
+.av-a{background:#FAEEDA;color:#633806;}
+.cr-name{font-size:13px;font-weight:500;}
+.cr-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+/* SERVICIOS */
+.srv-row{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:0.5px solid var(--border);border-radius:12px;margin-bottom:7px;}
+.srv-ico{width:38px;height:38px;border-radius:10px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--g2);flex-shrink:0;}
+.srv-nm{font-size:13px;font-weight:500;}
+.srv-dt{font-size:11px;color:var(--muted);}
+.precio-input{width:90px;padding:7px 9px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;text-align:right;}
+.precio-input:focus{outline:none;border-color:var(--g3);}
+/* FORM */
+.add-form{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;display:none;animation:fu 0.25s ease both;}
+.add-form.open{display:block;}
+.add-form h4{font-size:13px;font-weight:500;margin-bottom:12px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.r3{display:grid;grid-template-columns:1fr 1fr 55px;gap:8px;}
+/* GALERIA */
+.gal-upload-area{border:2px dashed var(--g3);border-radius:14px;padding:28px 20px;text-align:center;background:#fff;cursor:pointer;margin-bottom:14px;}
+.gal-upload-area.drag{background:var(--g5);}
+.gal-upload-area .up-ic{font-size:32px;margin-bottom:8px;}
+.gal-upload-area h4{font-size:14px;font-weight:500;color:var(--g2);margin-bottom:4px;}
+.gal-upload-area p{font-size:12px;color:var(--muted);}
+.gal-upload-area input[type=file]{display:none;}
+.gal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gal-card{background:#fff;border:0.5px solid var(--border);border-radius:12px;overflow:hidden;position:relative;}
+.gal-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.gal-card-body{padding:8px 10px;}
+.gal-card-body input{width:100%;border:none;font-size:12px;font-family:inherit;color:var(--txt);background:transparent;padding:0;}
+.gal-card-body input:focus{outline:none;}
+.gal-card-del{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(226,75,74,0.85);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.gal-card-badge{position:absolute;top:6px;left:6px;background:var(--g2);color:#fff;font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500;}
+/* HORARIOS */
+.dias-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:4px;}
+.dia-btn{padding:8px 4px;text-align:center;border:1px solid var(--border);border-radius:10px;cursor:pointer;font-size:11px;font-weight:500;background:#fff;color:var(--muted);transition:all 0.18s;}
+.dia-btn.activo{background:var(--g2);color:#fff;border-color:var(--g2);}
+.franja-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.franja-row input[type=time]{padding:8px 10px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;flex:1;}
+.franja-row input[type=time]:focus{outline:none;border-color:var(--g3);}
+.franja-sep{font-size:12px;color:var(--muted);}
+.franja-del{width:28px;height:28px;border-radius:50%;background:transparent;border:0.5px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-add-franja{padding:8px 14px;background:transparent;border:0.5px solid var(--g3);color:var(--g2);border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:4px;}
+.dur-select{padding:8px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;width:100%;}
+.dur-select:focus{outline:none;border-color:var(--g3);}
+.feriado-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.feriado-row:last-child{border-bottom:none;}
+.feriado-row .fd{flex:1;}
+.feriado-row .fn{font-size:11px;color:var(--muted);}
+.feriado-del{background:transparent;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px;}
+/* PAGOS */
+.metodo-admin-row{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:0.5px solid var(--border);border-radius:12px;margin-bottom:7px;}
+.metodo-admin-ic{width:40px;height:40px;border-radius:10px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.metodo-toggle{position:relative;width:38px;height:22px;flex-shrink:0;}
+.metodo-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.metodo-toggle-track{position:absolute;inset:0;border-radius:11px;background:var(--border);transition:background 0.2s;cursor:pointer;}
+.metodo-toggle input:checked+.metodo-toggle-track{background:var(--g3);}
+.metodo-toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.2s;pointer-events:none;}
+.metodo-toggle input:checked~.metodo-toggle-thumb{transform:translateX(16px);}
+.metodo-admin-info{flex:1;min-width:0;}
+.metodo-admin-nm{font-size:13px;font-weight:500;}
+.metodo-admin-det{font-size:11px;color:var(--muted);}
+.icono-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:10px;}
+.icono-opt{width:100%;aspect-ratio:1;border:0.5px solid var(--border);border-radius:8px;background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.icono-opt.sel-ic{border-color:var(--g2);background:var(--g5);}
+/* STATS */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.sc{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:12px;}
+.sc .sl{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.sc .sv{font-size:20px;font-weight:600;}
+.br-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.br-lbl{font-size:12px;color:var(--muted);width:90px;flex-shrink:0;}
+.br-track{flex:1;height:9px;background:var(--bg);border-radius:5px;overflow:hidden;border:0.5px solid var(--border);}
+.br-fill{height:100%;border-radius:5px;transition:width 0.7s ease;}
+.br-n{font-size:12px;font-weight:500;width:16px;text-align:right;}
+.hist-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.hist-row:last-child{border-bottom:none;}
+.hd{color:var(--muted);width:52px;flex-shrink:0;}
+.hs{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hp{color:var(--g2);flex-shrink:0;}
+/* EXPORTAR */
+.exp-filters{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.exp-filters h4{font-size:13px;font-weight:500;margin-bottom:12px;}
+.exp-card{background:#fff;border:0.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer;}
+.exp-card:active{border-color:var(--g3);}
+.exp-ic{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.exp-ic.verde{background:#E8F5E9;}
+.exp-ic.azul{background:#E3F2FD;}
+.exp-ic.naranja{background:#FFF3E0;}
+.exp-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+.exp-sub{font-size:12px;color:var(--muted);}
+.exp-arrow{font-size:18px;color:var(--muted);flex-shrink:0;margin-left:auto;}
+/* CONFIG */
+.cfg-preview{background:var(--g5);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--g1);margin-top:4px;}
+.cfg-pass-msg{display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:10px;}
+/* MODAL CONFIRMAR */
+.modal-confirm-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:24px;}
+.modal-confirm-bg.open{display:flex;animation:fu 0.2s ease both;}
+.modal-confirm-box{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center;}
+.modal-confirm-ic{width:56px;height:56px;border-radius:50%;background:#FCEBEB;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px;}
+.modal-confirm-box h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--txt);margin-bottom:8px;}
+.modal-confirm-box p{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px;}
+.modal-confirm-btns{display:flex;gap:10px;}
+.modal-confirm-btns .btn-cancel-conf{flex:1;padding:12px;border:0.5px solid var(--border);border-radius:10px;background:#fff;font-size:14px;font-family:inherit;cursor:pointer;color:var(--txt);}
+.modal-confirm-btns .btn-ok-conf{flex:1;padding:12px;border:none;border-radius:10px;background:var(--danger);color:#fff;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;}
+.modal-bg{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;animation:fu 0.2s ease both;}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:85vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px;}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.modal-info{font-size:13px;color:var(--muted);line-height:2;margin-bottom:14px;}
+.m-acts{display:flex;gap:8px;flex-wrap:wrap;}
+.modal-hist h4{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;}
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:300;display:none;align-items:center;justify-content:center;}
+.loading-overlay.show{display:flex;}
+.loading-box{background:#fff;border-radius:14px;padding:24px 32px;text-align:center;}
+.loading-box p{font-size:14px;color:var(--txt);margin-top:10px;}
+.spinner{width:36px;height:36px;border:3px solid var(--g5);border-top-color:var(--g2);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--muted);font-size:13px;}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--g1);color:#fff;padding:10px 20px;border-radius:100px;font-size:13px;z-index:400;display:none;animation:fu 0.3s ease both;}
+.toast.show{display:block;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-txt">Cargando...</p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">Est&#233;tica &amp; Bienestar</div>
+    <p class="login-sub">Panel del local &#8212; acceso privado</p>
+    <div class="login-err" id="login-err">Usuario o contrase&#241;a incorrectos.</div>
+    <div class="login-loading" id="login-loading">Verificando...</div>
+    <div class="fg"><label>Usuario</label><input type="text" id="l-user" placeholder="admin" maxlength="30" autocomplete="username"/></div>
+    <div class="fg"><label>Contrase&#241;a</label><input type="password" id="l-pass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" maxlength="50" autocomplete="current-password"/></div>
+    <button class="btn-login" onclick="doLogin()">Ingresar al panel</button>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel">
+  <div class="topbar">
+    <div class="tb-left">
+      <h1 id="tp-nombre">Panel del local</h1>
+      <p id="tp-fecha"></p>
+      <p id="tp-hora" style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;font-variant-numeric:tabular-nums;"></p>
+    </div>
+    <div style="display:flex;align-items:center;">
+      <div class="ing-hoy"><strong id="tp-ing">$0</strong><span>hoy</span></div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="met"><div class="mv mv-g" id="m-hoy">0</div><div class="ml">hoy</div></div>
+    <div class="met"><div class="mv mv-a" id="m-sem">0</div><div class="ml">semana</div></div>
+    <div class="met"><div class="mv mv-p" id="m-cli">0</div><div class="ml">clientes</div></div>
+    <div class="met"><div class="mv mv-b" id="m-tot">0</div><div class="ml">total</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="goTab('t-hoy',this)">Hoy</button>
+    <button class="tab" onclick="goTab('t-todos',this)">Turnos</button>
+    <button class="tab" onclick="goTab('t-clientes',this)">Clientes</button>
+    <button class="tab" onclick="goTab('t-galeria',this)">Galer&#237;a</button>
+    <button class="tab" onclick="goTab('t-resenas',this)">Rese&#241;as</button>
+    <button class="tab" onclick="goTab('t-servicios',this)">Servicios</button>
+    <button class="tab" onclick="goTab('t-horarios',this)">Horarios</button>
+    <button class="tab" onclick="goTab('t-pagos',this)">Pagos</button>
+    <button class="tab" onclick="goTab('t-stats',this)">Stats</button>
+    <button class="tab" onclick="goTab('t-exportar',this)">Exportar</button>
+    <button class="tab" onclick="goTab('t-config',this)">&#9881; Config</button>
+  </div>
+
+  <!-- HOY -->
+  <div class="sec active" id="t-hoy">
+    <div class="sec-hd"><h2 id="hoy-title">Turnos de hoy</h2><span class="badge b-ok" id="hoy-count">0 turnos</span></div>
+    <div id="hoy-list"></div>
+  </div>
+
+  <!-- TURNOS -->
+  <div class="sec" id="t-todos">
+    <div class="sec-hd"><h2>Todos los turnos</h2></div>
+    <input class="search-box" type="text" placeholder="Buscar por nombre o servicio..." oninput="filtrarTurnos(this.value)" maxlength="100"/>
+    <div id="todos-list"></div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="sec" id="t-clientes">
+    <div class="sec-hd"><h2>Clientes registrados</h2></div>
+    <div id="lista-negra-wrap"></div>
+    <input class="search-box" type="text" placeholder="Buscar cliente..." oninput="filtrarClientes(this.value)" maxlength="100"/>
+    <div id="clientes-list"></div>
+  </div>
+
+  <!-- GALERIA -->
+  <div class="sec" id="t-galeria">
+    <div class="sec-hd"><h2>Galer&#237;a de trabajos</h2><span class="badge b-ok" id="gal-count">0 fotos</span></div>
+    <div class="gal-upload-area" onclick="document.getElementById('gal-input').click()" id="gal-drop">
+      <div class="up-ic">&#128247;</div>
+      <h4 id="gal-upload-txt">Subir fotos de trabajos</h4>
+      <p>Tap para seleccionar desde tu c&#225;mara o galer&#237;a</p>
+      <p style="margin-top:4px;font-size:11px;">JPG, PNG &#8212; m&#225;ximo 5 MB por foto</p>
+      <input type="file" id="gal-input" accept="image/*" multiple onchange="subirFotos(this)"/>
+    </div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px;">Las fotos se muestran en la p&#225;gina del cliente autom&#225;ticamente.</p>
+    <div class="gal-grid" id="gal-grid"></div>
+  </div>
+
+  <!-- RESEÑAS -->
+  <div class="sec" id="t-resenas">
+    <div class="sec-hd"><h2>Rese&#241;as</h2></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Las rese&#241;as son enviadas por los clientes desde la p&#225;gina. Aprob&#225;las o rechaz&#225;las desde ac&#225;.</p>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn-main" onclick="filtroResenas('pendiente',this)" id="btn-pend" style="flex:1;">Pendientes</button>
+      <button class="btn-sec" onclick="filtroResenas('aprobada',this)" id="btn-aprob" style="flex:1;">Aprobadas</button>
+      <button class="btn-sec" onclick="filtroResenas('rechazada',this)" id="btn-rech" style="flex:1;">Rechazadas</button>
+    </div>
+    <div id="resenas-list"></div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <div class="sec" id="t-servicios">
+    <div class="sec-hd"><h2>Servicios y precios</h2><button class="btn-add" onclick="toggleAddSrv()">+ Agregar</button></div>
+    <div class="add-form" id="add-srv-form">
+      <h4>Nuevo servicio</h4>
+      <div class="fg"><label>Nombre</label><input id="as-nombre" type="text" placeholder="Ej: Depilaci&#243;n" maxlength="60"/></div>
+      <div class="r3">
+        <div class="fg"><label>Minutos</label><input id="as-dur" type="number" placeholder="45" min="5" max="480"/></div>
+        <div class="fg"><label>Precio</label><input id="as-precio" type="number" placeholder="3000" min="0" max="9999999"/></div>
+        <div class="fg"><label>Ic</label><input id="as-ic" type="text" placeholder="D" maxlength="2"/></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sec" onclick="toggleAddSrv()">Cancelar</button>
+        <button class="btn-main" style="flex:1;" onclick="agregarServicio()">Guardar servicio</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Toc&#225; el precio para editarlo directamente.</p>
+    <div id="srv-list"></div>
+  </div>
+
+  <!-- HORARIOS -->
+  <div class="sec" id="t-horarios">
+    <div class="sec-hd"><h2>Configuraci&#243;n de horarios</h2></div>
+    <div class="card">
+      <div class="card-title">D&#237;as laborales</div>
+      <div class="dias-grid" id="dias-grid"></div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;">Toc&#225; para activar o desactivar un d&#237;a.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Franjas horarias</div>
+      <div id="franjas-list"></div>
+      <button class="btn-add-franja" onclick="agregarFranja()">+ Agregar franja</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Duraci&#243;n de cada turno</div>
+      <select class="dur-select" id="dur-turno">
+        <option value="15">15 minutos</option>
+        <option value="20">20 minutos</option>
+        <option value="30" selected>30 minutos</option>
+        <option value="45">45 minutos</option>
+        <option value="60">1 hora</option>
+        <option value="90">1 hora 30 min</option>
+        <option value="120">2 horas</option>
+      </select>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">Feriados</div>
+        <button class="btn-add" onclick="toggleFeriado()">+ Agregar</button>
+      </div>
+      <div class="add-form" id="add-feriado-form">
+        <h4>Nuevo feriado</h4>
+        <div class="r2">
+          <div class="fg"><label>Fecha</label><input type="date" id="f-feriado-fecha"/></div>
+          <div class="fg"><label>Descripci&#243;n</label><input id="f-feriado-desc" type="text" placeholder="Ej: Navidad" maxlength="40"/></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sec" onclick="toggleFeriado()">Cancelar</button>
+          <button class="btn-main" style="flex:1;" onclick="agregarFeriado()">Guardar</button>
+        </div>
+      </div>
+      <div id="feriados-list"></div>
+    </div>
+    <button class="btn-main" onclick="guardarHorarios()">Guardar horarios</button>
+  </div>
+
+  <!-- PAGOS -->
+  <div class="sec" id="t-pagos">
+    <div class="sec-hd"><h2>M&#233;todos de pago</h2></div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Activ&#225; los m&#233;todos que quer&#233;s mostrar en la p&#225;gina del cliente.</p>
+    <div class="card">
+      <div class="card-title">M&#233;todos disponibles</div>
+      <div id="metodos-list"></div>
+      <button class="btn-add" style="margin-top:10px;" onclick="toggleAddMetodo()">+ Agregar m&#233;todo</button>
+      <div class="add-form" id="add-metodo-form">
+        <h4>Nuevo m&#233;todo</h4>
+        <div class="fg"><label>Nombre</label><input id="cm-nombre" type="text" placeholder="Ej: Uala" maxlength="40"/></div>
+        <div class="fg"><label>Descripci&#243;n</label><input id="cm-desc" type="text" placeholder="Ej: Billetera virtual" maxlength="50"/></div>
+        <div class="fg"><label>&#205;cono (emoji)</label>
+          <div class="icono-grid" id="icono-grid"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sec" onclick="toggleAddMetodo()">Cancelar</button>
+          <button class="btn-main" style="flex:1;" onclick="agregarMetodo()">Guardar</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-main" onclick="guardarMetodos()">Guardar m&#233;todos de pago</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="sec" id="t-stats">
+    <div class="sec-hd"><h2>Estad&#237;sticas</h2></div>
+    <div class="sg">
+      <div class="sc"><div class="sl">Total turnos</div><div class="sv mv-g" id="st-tot">0</div></div>
+      <div class="sc"><div class="sl">Ingresos est.</div><div class="sv mv-a" id="st-ing">$0</div></div>
+      <div class="sc"><div class="sl">Turnos semana</div><div class="sv mv-g" id="st-t-sem">0</div></div>
+      <div class="sc"><div class="sl">Ing. esta semana</div><div class="sv mv-a" id="st-ing-sem">$0</div></div>
+      <div class="sc"><div class="sl">Turnos mes</div><div class="sv mv-g" id="st-t-mes">0</div></div>
+      <div class="sc"><div class="sl">Ing. este mes</div><div class="sv mv-a" id="st-ing-mes">$0</div></div>
+      <div class="sc"><div class="sl">Clientes &#250;nicos</div><div class="sv mv-p" id="st-cli">0</div></div>
+      <div class="sc"><div class="sl">Ticket promedio</div><div class="sv mv-b" id="st-avg">$0</div></div>
+    </div>
+    <div class="card"><p style="font-size:13px;font-weight:500;margin-bottom:10px;">Servicios m&#225;s solicitados</p><div id="st-bars"></div></div>
+    <div class="card"><p style="font-size:13px;font-weight:500;margin-bottom:10px;">Historial reciente</p><div id="st-hist"></div></div>
+  </div>
+
+  <!-- EXPORTAR -->
+  <div class="sec" id="t-exportar">
+    <div class="sec-hd"><h2>Exportar datos</h2></div>
+    <div class="exp-filters">
+      <h4>Filtrar por fecha</h4>
+      <div class="r2">
+        <div class="fg"><label>Desde</label><input type="date" id="exp-desde"/></div>
+        <div class="fg"><label>Hasta</label><input type="date" id="exp-hasta"/></div>
+      </div>
+    </div>
+    <div class="exp-card" onclick="exportarTurnos()">
+      <div class="exp-ic verde">&#128197;</div>
+      <div><div class="exp-title">Turnos (.xlsx)</div><div class="exp-sub">Fecha, hora, cliente, servicio, precio</div></div>
+      <div class="exp-arrow">&#8595;</div>
+    </div>
+    <div class="exp-card" onclick="exportarClientes()">
+      <div class="exp-ic azul">&#128101;</div>
+      <div><div class="exp-title">Clientes (.xlsx)</div><div class="exp-sub">Nombre, tel&#233;fono, email, turnos</div></div>
+      <div class="exp-arrow">&#8595;</div>
+    </div>
+    <div class="exp-card" onclick="exportarIngresos()">
+      <div class="exp-ic naranja">&#128176;</div>
+      <div><div class="exp-title">Ingresos (.xlsx)</div><div class="exp-sub">Historial con total general</div></div>
+      <div class="exp-arrow">&#8595;</div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="sec" id="t-config">
+    <div class="sec-hd"><h2>Configuraci&#243;n general</h2></div>
+    <div class="card">
+      <div class="card-title">Datos del negocio</div>
+      <div class="fg"><label>Nombre del negocio</label><input id="cfg-nombre" type="text" maxlength="60"/></div>
+      <div class="fg"><label>TT&#237;tulo principal (hero)#237;tulo principal</label><input id="cfg-hero-titulo" type="text" maxlength="80" placeholder="Ej: Centro de Est&#233;tica, Sal&#243;n de Belleza..."/><p style="font-size:11px;color:var(--muted);margin-top:4px;">Es el t&#237;tulo grande que ven los clientes. Si lo dej&#225;s vac&#237;o usa &ldquo;Centro de [nombre]&rdquo;.</p></div>
+      <div class="fg"><label>SubtSubt&#237;tulo (hero)#237;tulo</label><input id="cfg-hero-subtitulo" type="text" maxlength="120" placeholder="Ej: Tu belleza, nuestro trabajo. Reserv&#225; tu turno en segundos."/></div>
+      <div class="fg"><label>Tel&#233;fono / WhatsApp</label><input id="cfg-tel" type="tel" maxlength="20"/></div>
+      <div class="fg"><label>Direcci&#243;n</label><input id="cfg-dir" type="text" maxlength="100"/></div>
+      <div class="fg"><label>Horario de atenci&#243;n</label><input id="cfg-horario-txt" type="text" maxlength="60"/></div>
+      <div class="fg"><label>Instagram (sin @)</label><input id="cfg-ig" type="text" maxlength="40"/></div>
+    </div>
+    <div class="card">
+      <div class="card-title">EstadEstad&#237;sticas del hero#237;sticas</div>
+      <div class="r2">
+        <div class="fg"><label>N&#250;m 1</label><input id="cfg-s1-num" type="text" maxlength="10" oninput="actualizarPreview()"/></div>
+        <div class="fg"><label>Texto 1</label><input id="cfg-s1-lbl" type="text" maxlength="20" oninput="actualizarPreview()"/></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>N&#250;m 2</label><input id="cfg-s2-num" type="text" maxlength="10" oninput="actualizarPreview()"/></div>
+        <div class="fg"><label>Texto 2</label><input id="cfg-s2-lbl" type="text" maxlength="20" oninput="actualizarPreview()"/></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label>N&#250;m 3</label><input id="cfg-s3-num" type="text" maxlength="10" oninput="actualizarPreview()"/></div>
+        <div class="fg"><label>Texto 3</label><input id="cfg-s3-lbl" type="text" maxlength="20" oninput="actualizarPreview()"/></div>
+      </div>
+      <div class="cfg-preview" id="cfg-preview"></div>
+    </div>
+    <button class="btn-main" style="margin-bottom:12px;" onclick="guardarConfig()">Guardar configuraci&#243;n</button>
+    <div class="card">
+      <div class="card-title">Cambiar contrase&#241;a</div>
+      <div class="fg"><label>Usuario</label><input id="cfg-user" type="text" maxlength="30" autocomplete="off"/></div>
+      <div class="fg"><label>Contrase&#241;a actual</label><input id="cfg-pass-actual" type="password" maxlength="50" autocomplete="off"/></div>
+      <div class="fg"><label>Contrase&#241;a nueva</label><input id="cfg-pass-nueva" type="password" maxlength="50" autocomplete="new-password"/></div>
+      <div class="fg"><label>Confirmar nueva</label><input id="cfg-pass-confirm" type="password" maxlength="50" autocomplete="new-password"/></div>
+      <div class="cfg-pass-msg" id="cfg-pass-msg"></div>
+      <button class="btn-danger" style="width:100%;padding:12px;" onclick="cambiarPassword()">Cambiar contrase&#241;a</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINACIÓN -->
+<div class="modal-confirm-bg" id="mod-confirm">
+  <div class="modal-confirm-box">
+    <div class="modal-confirm-ic">🗑️</div>
+    <h3 id="mod-confirm-title">¿Eliminás esto?</h3>
+    <p id="mod-confirm-msg">Esta acción no se puede deshacer.</p>
+    <div class="modal-confirm-btns">
+      <button class="btn-cancel-conf" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-ok-conf" onclick="doConfirm()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TURNO -->
+<div class="modal-bg" id="mod-t">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="mod-t-name"></h3>
+    <p class="modal-sub" id="mod-t-sub"></p>
+    <div class="modal-info" id="mod-t-info"></div>
+    <div class="m-acts">
+      <button class="btn-sec" onclick="closeMod('mod-t')">Cerrar</button>
+      <button class="btn-warn-s" onclick="reprogramarT()">Reprogramar</button>
+      <button class="btn-aus" onclick="noAsistioT()" style="padding:10px 14px;border:0.5px solid #E24B4A;color:#E24B4A;background:#FCEBEB;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;">No asistió</button>
+      <button class="btn-danger" onclick="cancelarT()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-bg" id="mod-c">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3 id="mod-c-name"></h3>
+    <div class="modal-info" id="mod-c-info"></div>
+    <div class="modal-hist" id="mod-c-hist"></div>
+    <div class="m-acts" style="margin-top:12px;">
+      <button class="btn-sec" onclick="closeMod('mod-c')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================
+   SUPABASE CONFIG
+   ========================================== */
+var SB_URL='https://dbdbsjlkhbugltevwdga.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRiZGJzamxraGJ1Z2x0ZXZ3ZGdhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwNjkwNjEsImV4cCI6MjA5MzY0NTA2MX0.swNF9b5GBo6znU4t-OARzVJuhdSTlCITNne84QaFxro';
+
+function sbHeaders(){
+  return {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+}
+
+async function sbGet(tabla,filtros){
+  var url=SB_URL+'/rest/v1/'+tabla+'?select=*'+(filtros?'&'+filtros:'');
+  var r=await fetch(url,{headers:sbHeaders()});
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error leyendo '+tabla);}
+  return r.json();
+}
+
+async function sbPost(tabla,datos){
+  var r=await fetch(SB_URL+'/rest/v1/'+tabla,{
+    method:'POST',headers:{...sbHeaders(),'Prefer':'return=representation'},
+    body:JSON.stringify(datos)
+  });
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error creando en '+tabla);}
+  return r.json();
+}
+
+async function sbPatch(tabla,filtro,datos){
+  var r=await fetch(SB_URL+'/rest/v1/'+tabla+'?'+filtro,{
+    method:'PATCH',headers:{...sbHeaders(),'Prefer':'return=representation'},
+    body:JSON.stringify(datos)
+  });
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error actualizando '+tabla);}
+  return r.json();
+}
+
+async function sbDelete(tabla,filtro){
+  var r=await fetch(SB_URL+'/rest/v1/'+tabla+'?'+filtro,{
+    method:'DELETE',headers:sbHeaders()
+  });
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error eliminando en '+tabla);}
+}
+
+async function sbUpsert(tabla,datos,onConflict){
+  var url=SB_URL+'/rest/v1/'+tabla+(onConflict?'?on_conflict='+onConflict:'');
+  var r=await fetch(url,{
+    method:'POST',headers:{...sbHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify(datos)
+  });
+  if(!r.ok){var e=await r.json();throw new Error(e.message||'Error upsert '+tabla);}
+  return r.json();
+}
+
+/* ==========================================
+   UTILS
+   ========================================== */
+var TODAY=new Date().toISOString().split('T')[0];
+var DIAS_N=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
+var FILLS=['#52B788','#7F77DD','#F4A261','#378ADD'];
+var AV_COLS=['av-g','av-p','av-a'];
+
+function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
+function numSafe(v,d){var n=parseInt(v);return(isNaN(n)||n<0)?d:n;}
+function fmtFecha(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s||'';}}
+function addDays(s,n){var d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+
+function showLoading(txt){
+  document.getElementById('loading-txt').textContent=txt||'Cargando...';
+  document.getElementById('loading').classList.add('show');
+}
+function hideLoading(){document.getElementById('loading').classList.remove('show');}
+
+function showToast(msg,ok){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=ok===false?'var(--danger)':'var(--g1)';
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2500);
+}
+
+/* ==========================================
+   ESTADO GLOBAL
+   ========================================== */
+var sesion={id:null,usuario:'',password:''};
+var turnos=[];
+var servicios=[];
+var clientes=[];
+var galeria=[];
+var metodos=[];
+var configNeg={};
+var horarios={diasActivos:[1,2,3,4,5,6],franjas:[{desde:'09:00',hasta:'12:00'},{desde:'14:00',hasta:'19:00'}],durTurno:30,feriados:[]};
+var activeTId=null;
+var iconoSel='&#128179;';
+var ICONOS=['&#128179;','&#128180;','&#128181;','&#128247;','&#128184;','&#128176;','&#10003;','&#9733;','&#128104;','&#128241;','&#128205;','&#128336;'];
+
+/* ==========================================
+   LOGIN
+   ========================================== */
+/* Rate limiting login */
+var _loginAttempts=0,_loginBlocked=false,_loginTimer=null;
+
+async function doLogin(){
+  if(_loginBlocked){
+    document.getElementById('login-err').textContent='Demasiados intentos. Esperá 30 segundos.';
+    document.getElementById('login-err').style.display='block';
+    return;
+  }
+  var u=document.getElementById('l-user').value.trim();
+  var p=document.getElementById('l-pass').value;
+  if(!u||!p){
+    document.getElementById('login-err').textContent='Completá usuario y contraseña.';
+    document.getElementById('login-err').style.display='block';
+    return;
+  }
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-loading').style.display='block';
+  try {
+    var data=await sbGet('usuarios','usuario=eq.'+encodeURIComponent(u)+'&select=id,usuario,password&limit=1');
+    if(data&&data.length>0&&data[0].password===p){
+      _loginAttempts=0;
+      sesion={id:data[0].id,usuario:u,password:p};
+      document.getElementById('login').style.display='none';
+      document.getElementById('panel').style.display='block';
+      await initPanel();
+      iniciarRealtime();
+    } else {
+      _loginAttempts++;
+      if(_loginAttempts>=5){
+        _loginBlocked=true;
+        document.getElementById('login-err').textContent='Demasiados intentos fallidos. Esperá 30 segundos.';
+        setTimeout(function(){_loginBlocked=false;_loginAttempts=0;},30000);
+      } else {
+        document.getElementById('login-err').textContent='Usuario o contraseña incorrectos.';
+      }
+      document.getElementById('login-err').style.display='block';
+      document.getElementById('login-loading').style.display='none';
+    }
+  } catch(e){
+    document.getElementById('login-err').textContent='Error de conexión. Reintentá.';
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('login-loading').style.display='none';
+  }
+}
+
+function doLogout(){
+  document.getElementById('panel').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('l-pass').value='';
+  document.getElementById('login-err').style.display='none';
+  document.getElementById('login-loading').style.display='none';
+  sesion={id:null,usuario:'',password:''};
+  turnos=[];servicios=[];clientes=[];galeria=[];
+}
+
+window.addEventListener('load',function(){
+  var lp=document.getElementById('l-pass');
+  if(lp) lp.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+});
+
+/* ==========================================
+   INIT PANEL
+   ========================================== */
+async function initPanel(){
+  showLoading('Cargando datos...');
+  document.getElementById('tp-fecha').textContent=fmtFecha(TODAY);
+  function actualizarHora(){
+    var now=new Date();
+    var h=now.getHours().toString().padStart(2,'0');
+    var m=now.getMinutes().toString().padStart(2,'0');
+    var s=now.getSeconds().toString().padStart(2,'0');
+    document.getElementById('tp-hora').textContent=h+':'+m+':'+s;
+  }
+  actualizarHora();
+  setInterval(actualizarHora,1000);
+  document.getElementById('exp-desde').value=TODAY;
+  document.getElementById('exp-hasta').value=TODAY;
+  try {
+    await Promise.all([
+      cargarTurnos(),
+      cargarServicios(),
+      cargarClientes(),
+      cargarGaleria(),
+      cargarConfig(),
+      cargarMetodos(),
+      cargarResenas()
+    ]);
+    renderHoy();
+    updateMetrics();
+  } catch(e){
+    showToast('Error cargando datos: '+e.message, false);
+  }
+  hideLoading();
+}
+
+/* ==========================================
+   CARGAR DATOS DESDE SUPABASE
+   ========================================== */
+async function cargarTurnos(){
+  /* Consultas separadas para evitar problemas con JOIN y RLS */
+  var dataTurnos=await sbGet('turnos','order=fecha.desc,hora.asc');
+  var dataClientes=await sbGet('clientes','');
+  var dataServicios=await sbGet('servicios','');
+
+  /* Crear mapas para lookup rápido */
+  var mapCli={};dataClientes.forEach(function(c){mapCli[c.id]=c;});
+  var mapSrv={};dataServicios.forEach(function(s){mapSrv[s.id]=s;});
+
+  turnos=dataTurnos.map(function(t){
+    var cli=mapCli[t.cliente_id]||{};
+    var srv=mapSrv[t.servicio_id]||{};
+    return {
+      id:t.id,
+      nombre:cli.nombre||'',
+      apellido:cli.apellido||'',
+      tel:cli.telefono||'',
+      email:cli.email||'',
+      notas:cli.notas||'',
+      servicio:srv.nombre||'',
+      dur:srv.duracion||0,
+      precio:t.precio||0,
+      fecha:t.fecha||'',
+      hora:t.hora?t.hora.slice(0,5):'',
+      estado:t.estado||'confirmado',
+      cliente_id:t.cliente_id,
+      servicio_id:t.servicio_id
+    };
+  });
+}
+
+async function cargarServicios(){
+  var data=await sbGet('servicios','order=id.asc');
+  servicios=data.map(function(s){
+    return {id:s.id,nombre:s.nombre,dur:s.duracion,precio:s.precio,ic:s.icono||s.nombre.slice(0,2).toUpperCase(),activo:s.activo};
+  });
+}
+
+async function cargarClientes(){
+  var data=await sbGet('clientes','order=id.asc');
+  clientes=data;
+}
+
+async function cargarGaleria(){
+  var data=await sbGet('galeria','activo=eq.true&order=orden.asc');
+  galeria=data.map(function(g){return{id:g.id,url:g.url,etiqueta:g.etiqueta||''};});
+}
+
+async function cargarConfig(){
+  var data=await sbGet('configuracion','');
+  configNeg={};
+  data.forEach(function(c){configNeg[c.clave]=c.valor;});
+  /* Aplicar en UI */
+  if(configNeg.nombre_negocio){
+    document.getElementById('tp-nombre').textContent=configNeg.nombre_negocio;
+  }
+}
+
+async function cargarMetodos(){
+  try {
+    var data=await sbGet('configuracion','clave=eq.metodos_pago');
+    if(data&&data.length>0){
+      metodos=JSON.parse(data[0].valor||'[]');
+    } else {
+      metodos=[
+        {id:1,ic:'&#128179;',nombre:'Tarjeta de cr\u00e9dito',desc:'Visa, Mastercard, Amex',activo:true},
+        {id:2,ic:'&#128180;',nombre:'Tarjeta de d\u00e9bito',desc:'Todas las tarjetas',activo:true},
+        {id:3,ic:'&#128181;',nombre:'Efectivo',desc:'En el local',activo:true},
+        {id:4,ic:'&#128247;',nombre:'Transferencia',desc:'CBU / Alias',activo:false},
+      ];
+    }
+  } catch(e){ metodos=[]; }
+}
+
+/* ==========================================
+   TABS
+   ========================================== */
+function goTab(id,btn){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  var renders={
+    't-hoy':function(){renderHoy();},
+    't-todos':function(){renderTurnos('');},
+    't-clientes':function(){renderClientes('');},
+    't-galeria':function(){renderGaleria();},
+    't-resenas':function(){renderResenas();},
+    't-servicios':function(){renderServicios();},
+    't-horarios':function(){renderHorarios();},
+    't-pagos':function(){renderMetodos();},
+    't-stats':function(){renderStats();},
+    't-exportar':function(){},
+    't-config':function(){renderConfig();}
+  };
+  if(renders[id]) renders[id]();
+}
+
+/* ==========================================
+   MÉTRICAS
+   ========================================== */
+function fmtPeso(n){
+  return '$'+Math.round(n).toLocaleString('es-AR');
+}
+
+function updateMetrics(){
+  var act=turnos.filter(function(t){return t.estado==='confirmado';});
+  var hoy=act.filter(function(t){return t.fecha===TODAY;});
+  var d=new Date(TODAY);
+  var dow=d.getDay();var diff=dow===0?-6:1-dow;
+  var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
+  var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
+  var lunesStr=lunes.toISOString().slice(0,10);
+  var domingoStr=domingo.toISOString().slice(0,10);
+  var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
+  var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
+  document.getElementById('m-hoy').textContent=hoy.length;
+  document.getElementById('m-sem').textContent=sem.length;
+  document.getElementById('m-cli').textContent=seen.size;
+  document.getElementById('m-tot').textContent=act.length;
+  var ingHoy=hoy.reduce(function(a,t){return a+(t.precio||0);},0);
+  document.getElementById('tp-ing').textContent=fmtPeso(ingHoy);
+}
+
+/* ==========================================
+   HOY
+   ========================================== */
+function renderHoy(){
+  var hoy=turnos.filter(function(t){return t.fecha===TODAY&&t.estado==='confirmado';})
+    .sort(function(a,b){return (a.hora||'').localeCompare(b.hora||'');});
+  document.getElementById('hoy-count').textContent=hoy.length+' turno'+(hoy.length!==1?'s':'');
+  var c=document.getElementById('hoy-list');c.innerHTML='';
+  if(!hoy.length){c.innerHTML='<div class="empty">Sin turnos para hoy</div>';return;}
+  hoy.forEach(function(t,i){c.appendChild(mkRow(t,i));});
+}
+
+/* ==========================================
+   TODOS LOS TURNOS
+   ========================================== */
+function filtrarTurnos(q){renderTurnos(q);}
+function renderTurnos(q){
+  q=(q||'').toLowerCase().slice(0,100);
+  var list=turnos.filter(function(t){
+    return t.estado==='confirmado'&&((t.nombre||'')+(t.apellido||'')+(t.servicio||'')).toLowerCase().includes(q);
+  }).sort(function(a,b){return (b.fecha||'').localeCompare(a.fecha||'')||(a.hora||'').localeCompare(b.hora||'');});
+  var c=document.getElementById('todos-list');c.innerHTML='';
+  if(!list.length){c.innerHTML='<div class="empty">Sin resultados</div>';return;}
+  list.forEach(function(t,i){c.appendChild(mkRow(t,i));});
+}
+
+function mkRow(t,i){
+  var r=document.createElement('div');r.className='tr';r.style.animationDelay=(i*0.04)+'s';
+  var fut=(t.fecha||'')>=TODAY;
+  var nombre=san((t.nombre||'')+' '+(t.apellido||'')).trim()||'Sin nombre';
+  var servicio=san(t.servicio||'Sin servicio');
+  var fecha=t.fecha===TODAY?'hoy':san((t.fecha||'').slice(5).replace('-','/'));
+  r.innerHTML='<div class="tr-hora"><div class="h">'+san(t.hora||'-')+'</div><div class="m">'+(t.dur||0)+'min</div></div>'
+    +'<div class="tr-sep"></div>'
+    +'<div class="tr-info"><div class="tr-name">'+nombre+'</div>'
+    +'<div class="tr-det">'+servicio+' &middot; '+fecha+'</div>'
+    +(t.notas?'<div class="tr-nota">'+san(t.notas)+'</div>':'')
+    +'</div>'
+    +'<span class="badge '+(t.estado==='ausente'?'b-aus':fut?'b-ok':'b-warn')+'">'+(t.estado==='ausente'?'ausente':fut?'ok':'pasado')+'</span>'
+    +'<button class="ia" onclick="openModT('+parseInt(t.id)+')">&#8943;</button>';
+  return r;
+}
+
+/* ==========================================
+   CLIENTES
+   ========================================== */
+function filtrarClientes(q){renderClientes(q);}
+function renderClientes(q){
+  q=(q||'').toLowerCase().slice(0,100);
+  var seen={};var list=[];
+  /* Construir lista única de clientes desde todos los turnos */
+  turnos.forEach(function(t){
+    var key=t.cliente_id||t.tel||t.nombre;
+    if(!seen[key]){
+      seen[key]=true;
+      var ts=turnos.filter(function(x){return (x.cliente_id&&x.cliente_id===t.cliente_id)||x.tel===t.tel;});
+      var confirmados=ts.filter(function(x){return x.estado==='confirmado';});
+      var ausentes=ts.filter(function(x){return x.estado==='ausente';});
+      var totalG=confirmados.reduce(function(a,x){return a+(x.precio||0);},0);
+      list.push({nombre:t.nombre||'',apellido:t.apellido||'',tel:t.tel||'',email:t.email||'',notas:t.notas||'',count:confirmados.length,ausencias:ausentes.length,totalGastado:totalG,hist:ts});
+    }
+  });
+
+  /* Lista negra: 2 o más ausencias */
+  var negra=list.filter(function(c){return c.ausencias>=2;});
+  var negraWrap=document.getElementById('lista-negra-wrap');
+  if(negra.length){
+    negraWrap.innerHTML='<div class="negra-banner"><h4>⛔ Lista negra ('+negra.length+' cliente'+(negra.length!==1?'s':'')+')</h4>'
+      +negra.map(function(c){
+        return '<div class="negra-row">'
+          +'<div class="negra-name">'+san(c.nombre)+' '+san(c.apellido)+(c.tel?' · '+san(c.tel):'')+'</div>'
+          +'<div class="negra-cnt">'+c.ausencias+' ausencias</div>'
+          +'</div>';
+      }).join('')+'</div>';
+  } else {
+    negraWrap.innerHTML='';
+  }
+
+  var fil=list.filter(function(c){
+    return c.count>0&&((c.nombre||'')+(c.apellido||'')+(c.tel||'')).toLowerCase().includes(q);
+  });
+  var c=document.getElementById('clientes-list');c.innerHTML='';
+  if(!fil.length){c.innerHTML='<div class="empty">Sin clientes</div>';return;}
+  fil.forEach(function(cl,i){
+    var ini=((cl.nombre||'X')[0]+((cl.apellido||'X')[0]||'')).toUpperCase();
+    var r=document.createElement('div');r.className='cr';
+    var badge=cl.ausencias>=2
+      ?'<span class="badge b-negra">⛔ '+cl.ausencias+' ausencias</span>'
+      :cl.ausencias===1
+        ?'<span class="badge b-aus">⚠️ 1 ausencia</span>'
+        :'<span class="badge b-ok">'+cl.count+' turno'+(cl.count!==1?'s':'')+'</span>';
+    r.innerHTML='<div class="av '+AV_COLS[i%3]+'">'+san(ini)+'</div>'
+      +'<div style="flex:1;min-width:0;"><div class="cr-name">'+san(cl.nombre)+' '+san(cl.apellido)+'</div>'
+      +'<div class="cr-sub">'+(cl.tel?san(cl.tel):'Sin tel\u00e9fono')+'</div></div>'
+      +badge;
+    r.onclick=function(){openModC(cl);};
+    c.appendChild(r);
+  });
+}
+
+/* ==========================================
+   GALERÍA
+   ========================================== */
+async function subirFotos(input){
+  var files=Array.from(input.files);
+  var validos=files.filter(function(f){return f.type.startsWith('image/')&&f.size<=5*1024*1024;});
+  if(files.length>validos.length) showToast((files.length-validos.length)+' archivo(s) ignorado(s): solo im\u00e1genes hasta 5MB', false);
+  if(!validos.length) return;
+  document.getElementById('gal-upload-txt').textContent='Subiendo '+validos.length+' foto(s)...';
+  showLoading('Subiendo fotos...');
+  for(var i=0;i<validos.length;i++){
+    var f=validos[i];
+    try {
+      var nombre=Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      var resS=await fetch(SB_URL+'/storage/v1/object/galeria/'+nombre,{
+        method:'POST',
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':f.type,'x-upsert':'true'},
+        body:f
+      });
+      if(!resS.ok) throw new Error('Error al subir imagen');
+      var urlPublica=SB_URL+'/storage/v1/object/public/galeria/'+nombre;
+      var etiqueta=f.name.replace(/\.[^.]+$/,'').slice(0,40);
+      var gData=await sbPost('galeria',{url:urlPublica,etiqueta:etiqueta,orden:galeria.length,activo:true});
+      galeria.push({id:gData[0].id,url:urlPublica,etiqueta:etiqueta});
+    } catch(e){
+      showToast('Error subiendo '+f.name+': '+e.message, false);
+    }
+  }
+  document.getElementById('gal-upload-txt').textContent='Subir fotos de trabajos';
+  hideLoading();
+  renderGaleria();
+  input.value='';
+  showToast('\u2713 Fotos guardadas en la base de datos');
+}
+
+function renderGaleria(){
+  document.getElementById('gal-count').textContent=galeria.length+' foto'+(galeria.length!==1?'s':'');
+  var grid=document.getElementById('gal-grid');grid.innerHTML='';
+  if(!galeria.length){
+    grid.innerHTML='<div style="grid-column:span 2;text-align:center;padding:20px;color:var(--muted);font-size:13px;background:#fff;border-radius:12px;border:0.5px solid var(--border);">Todav\u00eda no hay fotos. Sub\u00ed la primera.</div>';
+    return;
+  }
+  galeria.forEach(function(item,i){
+    var card=document.createElement('div');card.className='gal-card';
+    card.innerHTML='<img src="'+san(item.url)+'" alt="'+san(item.etiqueta)+'" loading="lazy"/>'
+      +'<span class="gal-card-badge">'+(i+1)+'</span>'
+      +'<button class="gal-card-del" onclick="elimFoto('+parseInt(i)+','+parseInt(item.id||0)+')" title="Eliminar">&#10005;</button>'
+      +'<div class="gal-card-body"><input type="text" value="'+san(item.etiqueta)+'" placeholder="Descripci\u00f3n..." maxlength="40" onchange="editEtiqueta('+parseInt(i)+','+parseInt(item.id||0)+',this.value)"/></div>';
+    grid.appendChild(card);
+  });
+}
+
+async function elimFoto(idx,id){
+  showConfirm('¿Eliminás esta foto?','Esta acción no se puede deshacer y la foto se borrará de la galería.',async function(){
+    showLoading('Eliminando...');
+    try {
+      if(id) await sbDelete('galeria','id=eq.'+id);
+      galeria.splice(idx,1);
+      renderGaleria();
+      showToast('\u2713 Foto eliminada');
+    } catch(e){showToast('Error: '+e.message, false);}
+    hideLoading();
+  });
+}
+
+async function editEtiqueta(idx,id,val){
+  if(!galeria[idx])return;
+  galeria[idx].etiqueta=val.slice(0,40);
+  try {
+    if(id) await sbPatch('galeria','id=eq.'+id,{etiqueta:galeria[idx].etiqueta});
+    showToast('\u2713 Descripci\u00f3n guardada');
+  } catch(e){showToast('Error: '+e.message, false);}
+}
+
+var dropArea=document.getElementById('gal-drop');
+dropArea.addEventListener('dragover',function(e){e.preventDefault();dropArea.classList.add('drag');});
+dropArea.addEventListener('dragleave',function(){dropArea.classList.remove('drag');});
+dropArea.addEventListener('drop',function(e){e.preventDefault();dropArea.classList.remove('drag');subirFotos({files:e.dataTransfer.files,value:''});});
+
+/* ==========================================
+   SERVICIOS
+   ========================================== */
+function renderServicios(){
+  var c=document.getElementById('srv-list');c.innerHTML='';
+  if(!servicios.length){c.innerHTML='<div class="empty">Sin servicios</div>';return;}
+  servicios.forEach(function(s){
+    var r=document.createElement('div');r.className='srv-row';
+    r.innerHTML='<div class="srv-ico">'+san(s.ic)+'</div>'
+      +'<div style="flex:1;min-width:0;"><div class="srv-nm">'+san(s.nombre)+'</div><div class="srv-dt">'+(s.dur||0)+' min</div></div>'
+      +'<input class="precio-input" type="number" value="'+(s.precio||0)+'" min="0" max="9999999" onchange="updPrecio('+parseInt(s.id)+',this.value)" title="Editar precio"/>'
+      +'<button class="ia" style="margin-left:5px;color:var(--danger);border-color:rgba(226,75,74,0.3);" onclick="elimSrv('+parseInt(s.id)+')" title="Eliminar">X</button>';
+    c.appendChild(r);
+  });
+}
+
+async function updPrecio(id,val){
+  var n=parseInt(val);if(isNaN(n)||n<0||n>9999999)return;
+  try {
+    await sbPatch('servicios','id=eq.'+id,{precio:n});
+    var s=servicios.find(function(x){return x.id===id;});if(s)s.precio=n;
+    showToast('\u2713 Precio actualizado');
+  } catch(e){showToast('Error: '+e.message, false);}
+}
+
+function toggleAddSrv(){document.getElementById('add-srv-form').classList.toggle('open');}
+
+async function agregarServicio(){
+  var nombre=document.getElementById('as-nombre').value.trim();
+  if(!nombre||nombre.length>60){showToast('Ingres\u00e1 un nombre v\u00e1lido', false);return;}
+  var dur=numSafe(document.getElementById('as-dur').value,30);
+  if(dur<5||dur>480){showToast('Duraci\u00f3n inv\u00e1lida (5 a 480 min)', false);return;}
+  var precio=numSafe(document.getElementById('as-precio').value,0);
+  var ic=document.getElementById('as-ic').value.trim().slice(0,2)||nombre.slice(0,2).toUpperCase();
+  showLoading('Guardando servicio...');
+  try {
+    var data=await sbPost('servicios',{nombre:nombre,duracion:dur,precio:precio,icono:ic,activo:true});
+    servicios.push({id:data[0].id,nombre:nombre,dur:dur,precio:precio,ic:ic,activo:true});
+    ['as-nombre','as-dur','as-precio','as-ic'].forEach(function(id){document.getElementById(id).value='';});
+    toggleAddSrv();renderServicios();
+    showToast('\u2713 Servicio guardado en la base de datos');
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+async function elimSrv(id){
+  if(servicios.length<=1){showToast('Debe haber al menos un servicio', false);return;}
+  showConfirm('¿Eliminás este servicio?','Se borrará permanentemente y no aparecerá más en la página del cliente.',async function(){
+    showLoading('Eliminando...');
+    try {
+      await sbDelete('servicios','id=eq.'+id);
+      servicios=servicios.filter(function(s){return s.id!==id;});
+      renderServicios();showToast('\u2713 Servicio eliminado');
+    } catch(e){showToast('Error: '+e.message, false);}
+    hideLoading();
+  });
+}
+
+/* ==========================================
+   NO ASISTIÓ
+   ========================================== */
+async function noAsistioT(){
+  if(!activeTId)return;
+  var t=turnos.find(function(x){return x.id===activeTId;});
+  showLoading('Registrando ausencia...');
+  try {
+    await sbPatch('turnos','id=eq.'+activeTId,{estado:'ausente'});
+    await cargarTurnos();
+    closeMod('mod-t');updateMetrics();renderHoy();
+    showToast('⚠️ Ausencia registrada');
+    /* Contar ausencias del cliente */
+    if(t&&t.tel){
+      var ausencias=turnos.filter(function(x){return x.tel===t.tel&&x.estado==='ausente';}).length;
+      if(ausencias>=2){
+        showToast('⛔ '+san(t.nombre)+' tiene '+ausencias+' ausencias — agregado a lista negra', false);
+      }
+    }
+  } catch(e){showToast('Error: '+e.message,false);}
+  hideLoading();
+}
+
+
+async function cancelarT(){
+  if(!activeTId)return;
+  var t=turnos.find(function(x){return x.id===activeTId;});
+  showLoading('Cancelando turno...');
+  try {
+    await sbPatch('turnos','id=eq.'+activeTId,{estado:'cancelado'});
+    await cargarTurnos();
+    closeMod('mod-t');updateMetrics();renderHoy();
+    showToast('\u2713 Turno cancelado');
+    /* Abrir WhatsApp si tiene teléfono */
+    if(t&&t.tel){
+      var telLimpio=t.tel.replace(/\D/g,'');
+      if(telLimpio.length>=8){
+        var msg='Hola '+san(t.nombre)+'! Te avisamos que tu turno de '+san(t.servicio)+' del '+fmtFecha(t.fecha)+' a las '+san(t.hora)+' fue *cancelado*. Disculpá los inconvenientes. Si querés reprogramar, entrá a nuestra página o escribinos por acá. 🙏';
+        setTimeout(function(){
+          window.open('https://wa.me/54'+telLimpio+'?text='+encodeURIComponent(msg),'_blank');
+        },500);
+      }
+    }
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+function reprogramarT(){
+  if(!activeTId)return;
+  var t=turnos.find(function(x){return x.id===activeTId;});
+  closeMod('mod-t');
+  /* Abrir modal de reprogramación */
+  if(t) abrirModalReprogramar(t);
+}
+
+function abrirModalReprogramar(t){
+  var mod=document.getElementById('mod-reprog');
+  if(!mod){
+    mod=document.createElement('div');
+    mod.id='mod-reprog';
+    mod.className='modal-bg';
+    mod.innerHTML=
+      '<div class="modal">'
+      +'<div class="modal-handle"></div>'
+      +'<h3>Reprogramar turno</h3>'
+      +'<p class="modal-sub" id="rp-sub"></p>'
+      +'<div class="fg" style="margin-top:14px;"><label>Nueva fecha</label><input type="date" id="rp-fecha" style="width:100%;padding:11px 13px;border:0.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;"/></div>'
+      +'<div class="fg"><label>Nueva hora</label><input type="time" id="rp-hora" style="width:100%;padding:11px 13px;border:0.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;"/></div>'
+      +'<div class="m-acts" style="margin-top:8px;">'
+      +'<button class="btn-sec" onclick="document.getElementById(\'mod-reprog\').classList.remove(\'open\')">Cancelar</button>'
+      +'<button class="btn-main" style="flex:1;" onclick="confirmarReprogramar()">Guardar y avisar por WhatsApp</button>'
+      +'</div>'
+      +'</div>';
+    document.body.appendChild(mod);
+  }
+  /* Prellenar datos */
+  document.getElementById('rp-sub').textContent=(t.nombre||'')+' '+( t.apellido||'')+' — '+( t.servicio||'');
+  var fechaInput=document.getElementById('rp-fecha');
+  var horaInput=document.getElementById('rp-hora');
+  fechaInput.value=t.fecha||'';
+  horaInput.value=t.hora||'';
+  fechaInput.min=TODAY;
+  mod._turnoId=t.id;
+  mod.classList.add('open');
+}
+
+async function confirmarReprogramar(){
+  var mod=document.getElementById('mod-reprog');
+  var nuevaFecha=document.getElementById('rp-fecha').value;
+  var nuevaHora=document.getElementById('rp-hora').value;
+  if(!nuevaFecha||!nuevaHora){showToast('Ingresá fecha y hora nueva', false);return;}
+  var tId=mod._turnoId;
+  var t=turnos.find(function(x){return x.id===tId;});
+  showLoading('Guardando reprogramación...');
+  try {
+    await sbPatch('turnos','id=eq.'+tId,{fecha:nuevaFecha,hora:nuevaHora+':00'});
+    await cargarTurnos();
+    mod.classList.remove('open');
+    updateMetrics();renderHoy();
+    showToast('\u2713 Turno reprogramado');
+    /* WhatsApp */
+    if(t&&t.tel){
+      var telLimpio=t.tel.replace(/\D/g,'');
+      if(telLimpio.length>=8){
+        var msg='Hola '+san(t.nombre)+'! Tu turno de '+san(t.servicio)+' fue *reprogramado* para el '+fmtFecha(nuevaFecha)+' a las '+nuevaHora+'. Si tenés alguna duda, avisanos. ¡Te esperamos! 💚';
+        setTimeout(function(){
+          window.open('https://wa.me/54'+telLimpio+'?text='+encodeURIComponent(msg),'_blank');
+        },500);
+      }
+    }
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+/* ==========================================
+   HORARIOS
+   ========================================== */
+function renderHorarios(){
+  var grid=document.getElementById('dias-grid');grid.innerHTML='';
+  DIAS_N.forEach(function(d,i){
+    var btn=document.createElement('button');
+    btn.className='dia-btn'+(horarios.diasActivos.includes(i)?' activo':'');
+    btn.textContent=d;
+    btn.onclick=function(){
+      var idx=horarios.diasActivos.indexOf(i);
+      if(idx>=0) horarios.diasActivos.splice(idx,1);
+      else horarios.diasActivos.push(i);
+      renderHorarios();
+    };
+    grid.appendChild(btn);
+  });
+  renderFranjas();renderFeriados();
+  document.getElementById('dur-turno').value=horarios.durTurno||30;
+}
+
+function renderFranjas(){
+  var c=document.getElementById('franjas-list');c.innerHTML='';
+  horarios.franjas.forEach(function(f,i){
+    var idx=parseInt(i);
+    var row=document.createElement('div');row.className='franja-row';
+    row.innerHTML='<input type="time" value="'+san(f.desde)+'" onchange="horarios.franjas['+idx+'].desde=this.value"/>'
+      +'<span class="franja-sep">a</span>'
+      +'<input type="time" value="'+san(f.hasta)+'" onchange="horarios.franjas['+idx+'].hasta=this.value"/>'
+      +'<button class="franja-del" onclick="elimFranja('+idx+')" title="Eliminar">&#10005;</button>';
+    c.appendChild(row);
+  });
+}
+function agregarFranja(){horarios.franjas.push({desde:'09:00',hasta:'18:00'});renderFranjas();}
+function elimFranja(i){if(horarios.franjas.length<=1){showToast('Debe haber al menos una franja', false);return;}horarios.franjas.splice(i,1);renderFranjas();}
+
+function renderFeriados(){
+  var c=document.getElementById('feriados-list');c.innerHTML='';
+  if(!horarios.feriados.length){c.innerHTML='<p style="font-size:12px;color:var(--muted);text-align:center;padding:10px 0;">Sin feriados cargados</p>';return;}
+  horarios.feriados.sort(function(a,b){return a.fecha.localeCompare(b.fecha);}).forEach(function(f,i){
+    c.innerHTML+='<div class="feriado-row">'
+      +'<div class="fd"><div style="font-size:13px;font-weight:500;">'+san(f.desc)+'</div><div class="fn">'+san(f.fecha.slice(5).replace('-','/'))+'</div></div>'
+      +'<button class="feriado-del" onclick="elimFeriado('+parseInt(i)+')">&#10005;</button>'
+      +'</div>';
+  });
+}
+function toggleFeriado(){document.getElementById('add-feriado-form').classList.toggle('open');}
+function agregarFeriado(){
+  var fecha=document.getElementById('f-feriado-fecha').value;
+  var desc=document.getElementById('f-feriado-desc').value.trim()||'Feriado';
+  if(!fecha){showToast('Seleccion\u00e1 una fecha', false);return;}
+  horarios.feriados.push({fecha:fecha,desc:desc.slice(0,40)});
+  document.getElementById('f-feriado-fecha').value='';
+  document.getElementById('f-feriado-desc').value='';
+  toggleFeriado();renderFeriados();
+}
+function elimFeriado(i){horarios.feriados.splice(i,1);renderFeriados();}
+
+async function guardarHorarios(){
+  horarios.durTurno=parseInt(document.getElementById('dur-turno').value)||30;
+  showLoading('Guardando horarios...');
+  try {
+    await sbUpsert('configuracion',[
+      {clave:'horarios_config',valor:JSON.stringify(horarios)}
+    ],'clave');
+    showToast('\u2713 Horarios guardados en la base de datos');
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+/* ==========================================
+   MÉTODOS DE PAGO
+   ========================================== */
+var metodosNextId=10;
+function renderMetodos(){
+  var c=document.getElementById('metodos-list');c.innerHTML='';
+  metodos.forEach(function(m){
+    var row=document.createElement('div');row.className='metodo-admin-row';
+    row.innerHTML='<div class="metodo-admin-ic">'+m.ic+'</div>'
+      +'<div class="metodo-admin-info"><div class="metodo-admin-nm">'+san(m.nombre)+'</div><div class="metodo-admin-det">'+san(m.desc)+'</div></div>'
+      +'<label class="metodo-toggle">'
+        +'<input type="checkbox"'+(m.activo?' checked':'')+' onchange="toggleMetodo('+parseInt(m.id)+',this.checked)"/>'
+        +'<div class="metodo-toggle-track"></div>'
+        +'<div class="metodo-toggle-thumb"></div>'
+      +'</label>'
+      +(m.custom?'<button class="ia" style="color:var(--danger);border-color:rgba(226,75,74,0.3);" onclick="elimMetodo('+parseInt(m.id)+')">X</button>':'');
+    c.appendChild(row);
+  });
+  renderIconoGrid();
+}
+function renderIconoGrid(){
+  var g=document.getElementById('icono-grid');if(!g)return;
+  g.innerHTML='';
+  ICONOS.forEach(function(ic){
+    var b=document.createElement('button');
+    b.className='icono-opt'+(ic===iconoSel?' sel-ic':'');
+    b.innerHTML=ic;b.type='button';
+    b.onclick=function(){iconoSel=ic;renderIconoGrid();};
+    g.appendChild(b);
+  });
+}
+function toggleMetodo(id,val){
+  var m=metodos.find(function(x){return x.id===id;});
+  if(m) m.activo=val;
+}
+function toggleAddMetodo(){document.getElementById('add-metodo-form').classList.toggle('open');renderIconoGrid();}
+function agregarMetodo(){
+  var nombre=document.getElementById('cm-nombre').value.trim();
+  var desc=document.getElementById('cm-desc').value.trim();
+  if(!nombre){showToast('Ingres\u00e1 el nombre', false);return;}
+  metodos.push({id:metodosNextId++,ic:iconoSel,nombre:nombre.slice(0,40),desc:desc.slice(0,50),activo:true,custom:true});
+  document.getElementById('cm-nombre').value='';document.getElementById('cm-desc').value='';
+  iconoSel=ICONOS[0];toggleAddMetodo();renderMetodos();
+}
+function elimMetodo(id){
+  showConfirm('¿Eliminás este método de pago?','Se quitará de la lista de métodos disponibles.',function(){
+    metodos=metodos.filter(function(m){return m.id!==id;});renderMetodos();
+  });
+}
+async function guardarMetodos(){
+  showLoading('Guardando m\u00e9todos...');
+  try {
+    await sbUpsert('configuracion',[
+      {clave:'metodos_pago',valor:JSON.stringify(metodos)}
+    ],'clave');
+    showToast('\u2713 M\u00e9todos de pago guardados');
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+/* ==========================================
+   ESTADÍSTICAS
+   ========================================== */
+function renderStats(){
+  var act=turnos.filter(function(t){return t.estado==='confirmado';});
+  var ing=act.reduce(function(a,t){return a+(t.precio||0);},0);
+  var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
+
+  /* Semana actual (lunes a domingo) */
+  var d=new Date(TODAY);
+  var dow=d.getDay();var diff=dow===0?-6:1-dow;
+  var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
+  var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
+  var lunesStr=lunes.toISOString().slice(0,10);
+  var domingoStr=domingo.toISOString().slice(0,10);
+  var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
+
+  /* Mes actual */
+  var mesStr=TODAY.slice(0,7);
+  var mes=act.filter(function(t){return (t.fecha||'').slice(0,7)===mesStr;});
+
+  var ingSem=sem.reduce(function(a,t){return a+(t.precio||0);},0);
+  var ingMes=mes.reduce(function(a,t){return a+(t.precio||0);},0);
+
+  document.getElementById('st-tot').textContent=act.length;
+  document.getElementById('st-ing').textContent=fmtPeso(ing);
+  document.getElementById('st-cli').textContent=seen.size;
+  document.getElementById('st-avg').textContent=act.length?fmtPeso(ing/act.length):'$0';
+  document.getElementById('st-ing-sem').textContent=fmtPeso(ingSem);
+  document.getElementById('st-ing-mes').textContent=fmtPeso(ingMes);
+  document.getElementById('st-t-sem').textContent=sem.length;
+  document.getElementById('st-t-mes').textContent=mes.length;
+
+  var counts={};act.forEach(function(t){if(t.servicio)counts[t.servicio]=(counts[t.servicio]||0)+1;});
+  var sorted=Object.entries(counts).sort(function(a,b){return b[1]-a[1];});
+  var max=sorted[0]?sorted[0][1]:1;
+  var bars=document.getElementById('st-bars');bars.innerHTML='';
+  sorted.forEach(function(e,i){
+    bars.innerHTML+='<div class="br-row"><span class="br-lbl">'+san(e[0].split(' ')[0])+'</span>'
+      +'<div class="br-track"><div class="br-fill" style="width:'+Math.round(e[1]/max*100)+'%;background:'+FILLS[i%4]+';"></div></div>'
+      +'<span class="br-n">'+e[1]+'</span></div>';
+  });
+  var hist=document.getElementById('st-hist');hist.innerHTML='';
+  act.slice(0,6).forEach(function(t){
+    hist.innerHTML+='<div class="hist-row"><span class="hd">'+san((t.fecha||'').slice(5).replace('-','/'))+'</span>'
+      +'<span class="hs">'+san(t.nombre||'')+' &middot; '+san(t.servicio||'')+'</span>'
+      +'<span class="hp">'+fmtPeso(t.precio||0)+'</span></div>';
+  });
+}
+
+/* ==========================================
+   EXPORTAR
+   ========================================== */
+function filtrarPorFecha(lista){
+  var desde=document.getElementById('exp-desde').value;
+  var hasta=document.getElementById('exp-hasta').value;
+  return lista.filter(function(t){
+    if(desde&&(t.fecha||'')<desde)return false;
+    if(hasta&&(t.fecha||'')>hasta)return false;
+    return true;
+  });
+}
+function xlsxDescargar(nombre, filas, totales){
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(filas);
+
+  /* Ancho de columnas automático */
+  var cols = filas[0].map(function(_, ci){
+    var max = 10;
+    filas.forEach(function(row){
+      var v = String(row[ci]===null||row[ci]===undefined?'':row[ci]);
+      if(v.length > max) max = v.length;
+    });
+    return { wch: Math.min(max + 2, 40) };
+  });
+  ws['!cols'] = cols;
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+  XLSX.writeFile(wb, nombre);
+}
+
+function exportarTurnos(){
+  var act=filtrarPorFecha(turnos.filter(function(t){return t.estado==='confirmado';}))
+    .sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'')||(a.hora||'').localeCompare(b.hora||'');});
+  if(!act.length){showToast('No hay turnos en ese rango', false);return;}
+  var filas=[['Fecha','Hora','Nombre','Apellido','Servicio','Duración (min)','Precio ($)','Teléfono','Email','Notas']];
+  act.forEach(function(t){filas.push([t.fecha||'',t.hora||'',t.nombre||'',t.apellido||'',t.servicio||'',t.dur||0,t.precio||0,t.tel||'',t.email||'',t.notas||'']);});
+  xlsxDescargar('turnos_'+TODAY+'.xlsx', filas);
+  showToast('\u2713 Exportado correctamente');
+}
+function exportarClientes(){
+  var seen={};var lista=[];
+  turnos.filter(function(t){return t.estado==='confirmado';}).forEach(function(t){
+    var key=t.cliente_id||t.tel||t.nombre;
+    if(!seen[key]){
+      seen[key]=true;
+      var ts=turnos.filter(function(x){return (x.cliente_id&&x.cliente_id===t.cliente_id)||x.tel===t.tel;});
+      lista.push({nombre:t.nombre||'',apellido:t.apellido||'',tel:t.tel||'',email:t.email||'',notas:t.notas||'',count:ts.length,total:ts.reduce(function(a,x){return a+(x.precio||0);},0),ultima:ts[0]?ts[0].fecha:''});
+    }
+  });
+  if(!lista.length){showToast('No hay clientes', false);return;}
+  var filas=[['Nombre','Apellido','Teléfono','Email','Notas','Cantidad turnos','Total gastado ($)','Última visita']];
+  lista.forEach(function(c){filas.push([c.nombre,c.apellido,c.tel,c.email,c.notas,c.count,c.total,c.ultima]);});
+  xlsxDescargar('clientes_'+TODAY+'.xlsx', filas);
+  showToast('\u2713 Exportado correctamente');
+}
+function exportarIngresos(){
+  var act=filtrarPorFecha(turnos.filter(function(t){return t.estado==='confirmado';}))
+    .sort(function(a,b){return (a.fecha||'').localeCompare(b.fecha||'');});
+  if(!act.length){showToast('No hay datos en ese rango', false);return;}
+  var total=act.reduce(function(a,t){return a+(t.precio||0);},0);
+  var filas=[['Fecha','Hora','Cliente','Servicio','Precio ($)']];
+  act.forEach(function(t){filas.push([t.fecha||'',t.hora||'',(t.nombre||'')+' '+(t.apellido||''),t.servicio||'',t.precio||0]);});
+  filas.push(['','','','TOTAL',total]);
+  xlsxDescargar('ingresos_'+TODAY+'.xlsx', filas);
+  showToast('\u2713 Exportado correctamente');
+}
+
+/* ==========================================
+   CONFIGURACIÓN
+   ========================================== */
+function renderConfig(){
+  document.getElementById('cfg-nombre').value=configNeg.nombre_negocio||'';
+  document.getElementById('cfg-hero-titulo').value=configNeg.hero_titulo||'';
+  document.getElementById('cfg-hero-subtitulo').value=configNeg.hero_subtitulo||'';
+  document.getElementById('cfg-tel').value=configNeg.telefono||'';
+  document.getElementById('cfg-dir').value=configNeg.direccion||'';
+  document.getElementById('cfg-horario-txt').value=configNeg.horario||'';
+  document.getElementById('cfg-ig').value=configNeg.instagram||'';
+  document.getElementById('cfg-s1-num').value=configNeg.stat1_num||'500+';
+  document.getElementById('cfg-s1-lbl').value=configNeg.stat1_lbl||'clientes';
+  document.getElementById('cfg-s2-num').value=configNeg.stat2_num||'8 a\u00f1os';
+  document.getElementById('cfg-s2-lbl').value=configNeg.stat2_lbl||'de experiencia';
+  document.getElementById('cfg-s3-num').value=configNeg.stat3_num||'4.9\u2605';
+  document.getElementById('cfg-s3-lbl').value=configNeg.stat3_lbl||'puntuaci\u00f3n';
+  document.getElementById('cfg-user').value=sesion.usuario||'';
+  actualizarPreview();
+}
+
+function actualizarPreview(){
+  var s1n=document.getElementById('cfg-s1-num').value||'500+';
+  var s1l=document.getElementById('cfg-s1-lbl').value||'clientes';
+  var s2n=document.getElementById('cfg-s2-num').value||'8 a\u00f1os';
+  var s2l=document.getElementById('cfg-s2-lbl').value||'de experiencia';
+  var s3n=document.getElementById('cfg-s3-num').value||'4.9\u2605';
+  var s3l=document.getElementById('cfg-s3-lbl').value||'puntuaci\u00f3n';
+  document.getElementById('cfg-preview').textContent=s1n+' '+s1l+' \u2022 '+s2n+' '+s2l+' \u2022 '+s3n+' '+s3l;
+}
+
+async function guardarConfig(){
+  var nombre=document.getElementById('cfg-nombre').value.trim();
+  if(!nombre){showToast('El nombre no puede estar vac\u00edo', false);return;}
+  showLoading('Guardando configuraci\u00f3n...');
+  var campos={
+    'nombre_negocio':nombre,
+    'hero_titulo':document.getElementById('cfg-hero-titulo').value.trim(),
+    'hero_subtitulo':document.getElementById('cfg-hero-subtitulo').value.trim(),
+    'telefono':document.getElementById('cfg-tel').value.trim(),
+    'direccion':document.getElementById('cfg-dir').value.trim(),
+    'horario':document.getElementById('cfg-horario-txt').value.trim(),
+    'instagram':document.getElementById('cfg-ig').value.trim(),
+    'stat1_num':document.getElementById('cfg-s1-num').value.trim(),
+    'stat1_lbl':document.getElementById('cfg-s1-lbl').value.trim(),
+    'stat2_num':document.getElementById('cfg-s2-num').value.trim(),
+    'stat2_lbl':document.getElementById('cfg-s2-lbl').value.trim(),
+    'stat3_num':document.getElementById('cfg-s3-num').value.trim(),
+    'stat3_lbl':document.getElementById('cfg-s3-lbl').value.trim()
+  };
+  try {
+    var rows=Object.entries(campos).map(function(e){return{clave:e[0],valor:e[1]};});
+    await sbUpsert('configuracion',rows,'clave');
+    /* Actualizar estado local */
+    Object.assign(configNeg,campos);
+    document.getElementById('tp-nombre').textContent=nombre;
+    showToast('\u2713 Configuraci\u00f3n guardada. La p\u00e1gina del cliente se actualiza autom\u00e1ticamente.');
+  } catch(e){showToast('Error: '+e.message, false);}
+  hideLoading();
+}
+
+async function cambiarPassword(){
+  var userNuevo=document.getElementById('cfg-user').value.trim();
+  var actual=document.getElementById('cfg-pass-actual').value;
+  var nueva=document.getElementById('cfg-pass-nueva').value;
+  var confirmar=document.getElementById('cfg-pass-confirm').value;
+  var msg=document.getElementById('cfg-pass-msg');
+  function mostrarMsg(txt,ok){
+    msg.textContent=txt;msg.style.display='block';
+    msg.style.background=ok?'var(--g5)':'#FCEBEB';
+    msg.style.color=ok?'var(--g1)':'#791F1F';
+    msg.style.border=ok?'0.5px solid var(--g3)':'0.5px solid #F09595';
+  }
+  if(!userNuevo){mostrarMsg('El usuario no puede estar vac\u00edo.', false);return;}
+  if(actual!==sesion.password){mostrarMsg('La contrase\u00f1a actual es incorrecta.', false);return;}
+  if(nueva.length<6){mostrarMsg('La nueva contrase\u00f1a debe tener al menos 6 caracteres.', false);return;}
+  if(nueva!==confirmar){mostrarMsg('Las contrase\u00f1as nuevas no coinciden.', false);return;}
+  showLoading('Actualizando contrase\u00f1a...');
+  try {
+    await sbPatch('usuarios','id=eq.'+sesion.id,{usuario:userNuevo,password:nueva});
+    sesion.usuario=userNuevo;sesion.password=nueva;
+    document.getElementById('cfg-pass-actual').value='';
+    document.getElementById('cfg-pass-nueva').value='';
+    document.getElementById('cfg-pass-confirm').value='';
+    mostrarMsg('\u2713 Contrase\u00f1a actualizada y guardada correctamente.', true);
+    setTimeout(function(){msg.style.display='none';},3000);
+  } catch(e){mostrarMsg('Error: '+e.message, false);}
+  hideLoading();
+}
+
+/* ==========================================
+   MODALES
+   ========================================== */
+function openModT(id){
+  activeTId=id;
+  var t=turnos.find(function(x){return x.id===id;});if(!t)return;
+  document.getElementById('mod-t-name').textContent=(t.nombre||'')+' '+(t.apellido||'');
+  document.getElementById('mod-t-sub').textContent=(t.servicio||'')+' \u2014 '+fmtFecha(t.fecha||'');
+  document.getElementById('mod-t-info').innerHTML=
+    '<div>&#128336; '+(t.hora||'-')+' ('+(t.dur||0)+' min)</div>'
+    +'<div>&#128176; '+fmtPeso(t.precio||0)+'</div>'
+    +(t.tel?'<div>&#128222; '+san(t.tel)+'</div>':'')
+    +(t.notas?'<div>&#128204; '+san(t.notas)+'</div>':'');
+  document.getElementById('mod-t').classList.add('open');
+}
+
+function openModC(cl){
+  document.getElementById('mod-c-name').textContent=(cl.nombre||'')+' '+(cl.apellido||'');
+  document.getElementById('mod-c-info').innerHTML=
+    '<div>&#128222; '+(cl.tel?san(cl.tel):'Sin tel\u00e9fono')+'</div>'
+    +(cl.email?'<div>&#128140; '+san(cl.email)+'</div>':'')
+    +(cl.notas?'<div>&#128204; '+san(cl.notas)+'</div>':'')
+    +'<div>&#128197; '+cl.count+' turno'+(cl.count!==1?'s':'')+' &middot; Total: '+fmtPeso(cl.totalGastado)+'</div>';
+  var h='<div class="modal-hist"><h4>\u00daltimos turnos</h4>';
+  cl.hist.slice(0,4).forEach(function(t){
+    h+='<div class="hist-row"><span class="hd">'+san((t.fecha||'').slice(5).replace('-','/'))+'</span>'
+      +'<span class="hs">'+san(t.servicio||'')+'</span>'
+      +'<span class="hp">'+fmtPeso(t.precio||0)+'</span></div>';
+  });
+  h+='</div>';
+  document.getElementById('mod-c-hist').innerHTML=h;
+  document.getElementById('mod-c').classList.add('open');
+}
+
+function closeMod(id){document.getElementById(id).classList.remove('open');activeTId=null;}
+
+/* ==========================================
+   MODAL CONFIRMAR PERSONALIZADO
+   ========================================== */
+var _confirmCallback=null;
+function showConfirm(titulo, msg, cb){
+  document.getElementById('mod-confirm-title').textContent=titulo;
+  document.getElementById('mod-confirm-msg').textContent=msg;
+  _confirmCallback=cb;
+  document.getElementById('mod-confirm').classList.add('open');
+}
+function closeConfirm(){
+  document.getElementById('mod-confirm').classList.remove('open');
+  _confirmCallback=null;
+}
+function doConfirm(){
+  var cb=_confirmCallback;
+  closeConfirm();
+  if(cb) cb();
+}
+
+
+var resenasFiltro='pendiente';
+var resenasData=[];
+
+async function cargarResenas(){
+  try {
+    resenasData=await sbGet('resenas','order=created_at.desc');
+  } catch(e){ resenasData=[]; }
+}
+
+function filtroResenas(estado,btn){
+  resenasFiltro=estado;
+  document.querySelectorAll('#btn-pend,#btn-aprob,#btn-rech').forEach(function(b){
+    b.className='btn-sec';b.style.flex='1';
+  });
+  btn.className='btn-main';btn.style.flex='1';
+  renderResenas();
+}
+
+function renderResenas(){
+  var c=document.getElementById('resenas-list');
+  var lista=resenasData.filter(function(r){return r.estado===resenasFiltro;});
+  if(!lista.length){
+    var msgs={pendiente:'No hay reseñas pendientes.',aprobada:'No hay reseñas aprobadas.',rechazada:'No hay reseñas rechazadas.'};
+    c.innerHTML='<div class="empty">'+msgs[resenasFiltro]+'</div>';
+    return;
+  }
+  c.innerHTML='';
+  lista.forEach(function(r){
+    var stars='';for(var s=1;s<=5;s++)stars+=(s<=(r.estrellas||5)?'★':'☆');
+    var el=document.createElement('div');
+    el.className='srv-row';
+    el.style.cssText='flex-direction:column;align-items:flex-start;gap:8px;';
+    var btns='';
+    if(r.estado==='pendiente'){
+      btns='<button class="btn-main" style="font-size:12px;padding:6px 12px;" onclick="cambiarEstadoResena('+r.id+',&quot;aprobada&quot;)">✓ Aprobar</button>'
+          +'<button class="btn-sec" style="font-size:12px;padding:6px 12px;color:var(--danger);" onclick="cambiarEstadoResena('+r.id+',&quot;rechazada&quot;)">Rechazar</button>';
+    } else if(r.estado==='aprobada'){
+      btns='<button class="btn-sec" style="font-size:12px;padding:6px 12px;color:var(--danger);" onclick="cambiarEstadoResena('+r.id+',&quot;rechazada&quot;)">Quitar</button>';
+    } else {
+      btns='<button class="btn-main" style="font-size:12px;padding:6px 12px;" onclick="cambiarEstadoResena('+r.id+',&quot;aprobada&quot;)">✓ Aprobar</button>';
+    }
+    el.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">'
+      +'<div><div class="srv-nm">'+san(r.nombre)+'</div>'
+      +'<div style="color:var(--acc);font-size:13px;letter-spacing:1px;">'+stars+'</div>'
+      +'<div style="font-size:10px;color:var(--muted);">'+new Date(r.created_at).toLocaleDateString('es-AR')+'</div></div>'
+      +'<div style="display:flex;gap:6px;flex-shrink:0;">'+btns+'</div>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--muted);line-height:1.5;width:100%;">'+san(r.texto)+'</div>';
+    c.appendChild(el);
+  });
+}
+
+async function cambiarEstadoResena(id,estado){
+  showLoading(estado==='aprobada'?'Aprobando...':'Actualizando...');
+  try {
+    await sbPatch('resenas','id=eq.'+id,{estado:estado});
+    var r=resenasData.find(function(x){return x.id===id;});
+    if(r) r.estado=estado;
+    renderResenas();
+    showToast(estado==='aprobada'?'✓ Reseña aprobada y visible en la página':'✓ Reseña actualizada');
+  } catch(e){ showToast('Error: '+e.message, false); }
+  hideLoading();
+}
+
+
+var supabaseClient=null;
+
+function iniciarRealtime(){
+  try {
+    if(!window.supabase){console.log('Supabase JS no cargado');return;}
+    supabaseClient=window.supabase.createClient(SB_URL,SB_KEY);
+    supabaseClient
+      .channel('turnos-nuevos')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'turnos'},function(){
+        cargarTurnos().then(function(){
+          updateMetrics();
+          var tabActiva=document.querySelector('.tab.active');
+          if(tabActiva&&tabActiva.textContent.trim()==='Hoy') renderHoy();
+          if(tabActiva&&tabActiva.textContent.trim()==='Turnos') renderTurnos('');
+          showToast('🔔 Nuevo turno recibido!');
+          try{
+            var ctx=new (window.AudioContext||window.webkitAudioContext)();
+            var osc=ctx.createOscillator();var g=ctx.createGain();
+            osc.connect(g);g.connect(ctx.destination);
+            osc.frequency.value=880;g.gain.value=0.08;
+            osc.start();osc.stop(ctx.currentTime+0.12);
+          }catch(e){}
+        });
+      })
+      .subscribe(function(status){
+        if(status==='SUBSCRIBED') console.log('Realtime activo - escuchando turnos nuevos');
+      });
+  } catch(e){
+    console.log('Realtime no disponible:', e.message);
+  }
+}
+
+</script>
+</body>
+</html>
