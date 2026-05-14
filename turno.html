@@ -184,7 +184,7 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
     </div>
     <div class="flex-row">
       <button class="btn-sec" onclick="goStep(2)">← Volver</button>
-      <button class="btn-main" id="btn-s3-cal" disabled onclick="goStep(3)">Continuar →</button>
+      <button class="btn-main" id="btn-s3-cal" disabled onclick="goStep(4)">Continuar →</button>
     </div>
   </div>
 
@@ -405,7 +405,10 @@ function renderProfGrid(){
     var sel=cSelProf&&cSelProf.id===p.id;
     var el=document.createElement('div');
     el.style.cssText='padding:14px 16px;border-radius:12px;border:1.5px solid '+(sel?'var(--g2)':'var(--border)')+';background:'+(sel?'var(--g5)':'#fff')+';cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.2s;';
-    el.innerHTML='<div style="width:38px;height:38px;border-radius:50%;background:var(--g2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;">'+san(p.nombre.slice(0,2).toUpperCase())+'</div>'
+    var avatarEl=p.foto_url
+      ?'<img src="'+san(p.foto_url)+'" alt="" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid '+(sel?'var(--g2)':'var(--border)')+';flex-shrink:0;"/>'
+      :'<div style="width:42px;height:42px;border-radius:50%;background:var(--g2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;">'+san(p.nombre.slice(0,2).toUpperCase())+'</div>';
+    el.innerHTML=avatarEl
       +'<div style="font-size:14px;font-weight:500;color:var(--txt);">'+san(p.nombre)+'</div>'
       +(sel?'<div style="margin-left:auto;color:var(--g2);">&#10003;</div>':'');
     el.onclick=function(){
@@ -457,14 +460,14 @@ async function confirmar(){
   if(!email){mostrarError('Por favor ingresá tu email.','c-email');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){mostrarError('El email ingresado no es válido.','c-email');return;}
   if(!cSelSrv||!cSelDate||!cSelSlot){mostrarError('Faltan datos del turno. Volvé al paso anterior.');return;}
-  var btn=document.getElementById('btn-s3');
+  var btn=document.getElementById('btn-s4');
   btn.disabled=true;btn.textContent='Guardando...';
   try {
     var check=await sbGet('turnos','fecha=eq.'+cSelDate+'&hora=eq.'+cSelSlot+'&estado=eq.confirmado&select=id');
     if(check&&check.length>0){
       mostrarError('Ese horario acaba de ser tomado por otra persona. Por favor elegí otro horario.');
       btn.disabled=false;btn.textContent='Confirmar turno';
-      goStep(2);return;
+      goStep(3);return;
     }
     var cData=await sbPost('clientes',{nombre:nombre,apellido:apellido,telefono:tel.replace(/\D/g,'').slice(0,15),email:email||null,notas:notas||null});
     await sbPost('turnos',{cliente_id:cData[0].id,servicio_id:cSelSrv.id,fecha:cSelDate,hora:cSelSlot,estado:'confirmado',precio:cSelSrv.precio,profesional_id:cSelProf?cSelProf.id:null,profesional_nombre:cSelProf?cSelProf.nombre:null});
@@ -478,7 +481,7 @@ async function confirmar(){
       +'<div class="sum-row"><span class="sum-lbl">Fecha</span><span class="sum-val">'+fmtF(cSelDate)+'</span></div>'
       +'<div class="sum-row"><span class="sum-lbl">Hora</span><span class="sum-val">'+cSelSlot+'</span></div>'
       +'<div class="sum-row"><span class="sum-lbl">Total</span><span class="sum-val">$'+parseInt(cSelSrv.precio).toLocaleString('es-AR')+'</span></div>';
-    goStep(4);
+    goStep(5);
   } catch(e){
     mostrarError('Hubo un error al guardar el turno. Intentá de nuevo.');
     btn.disabled=false;btn.textContent='Confirmar turno';
@@ -497,8 +500,8 @@ function resetForm(){
   ['c-nombre','c-apellido','c-tel','c-email','c-notas'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('btn-s1').disabled=true;
   document.getElementById('btn-s2').disabled=true;
-  document.getElementById('btn-s3').disabled=false;
-  document.getElementById('btn-s3').textContent='Confirmar turno';
+  document.getElementById('btn-s4').disabled=false;
+  document.getElementById('btn-s4').textContent='Confirmar turno';
   goStep(1);renderSrvGrid();renderCWeek();renderCSlots();
 }
 

@@ -495,6 +495,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="add-form" id="add-prof-form">
       <h4>Nuevo profesional</h4>
       <div class="fg"><label>Nombre</label><input id="ap-nombre" type="text" placeholder="Ej: Laura G." maxlength="50"/></div>
+      <div class="fg"><label>Foto (URL de imagen, opcional)</label><input id="ap-foto" type="url" placeholder="https://..." maxlength="500"/></div>
       <div style="display:flex;gap:8px;">
         <button class="btn-sec" onclick="toggleAddProfesional()">Cancelar</button>
         <button class="btn-main" style="flex:1;" onclick="agregarProfesional()">Guardar</button>
@@ -830,7 +831,15 @@ window.addEventListener('load',function(){
    ========================================== */
 async function initPanel(){
   showLoading('Cargando datos...');
-  document.getElementById('tp-fecha').textContent=fmtFecha(TODAY);
+  function actualizarHora(){
+    var ahora=new Date();
+    var hh=String(ahora.getHours()).padStart(2,'0');
+    var mm=String(ahora.getMinutes()).padStart(2,'0');
+    var ss=String(ahora.getSeconds()).padStart(2,'0');
+    document.getElementById('tp-fecha').textContent=fmtFecha(TODAY)+' — '+hh+':'+mm+':'+ss;
+  }
+  actualizarHora();
+  setInterval(actualizarHora,1000);
   document.getElementById('exp-desde').value=TODAY;
   document.getElementById('exp-hasta').value=TODAY;
   try {
@@ -1349,7 +1358,7 @@ async function cargarProfesionales(){
 function toggleAddProfesional(){
   var f=document.getElementById('add-prof-form');
   f.classList.toggle('open');
-  if(f.classList.contains('open')) document.getElementById('ap-nombre').value='';
+  if(f.classList.contains('open')){document.getElementById('ap-nombre').value='';document.getElementById('ap-foto').value='';}
 }
 
 function toggleAddUsuario(){
@@ -1375,7 +1384,7 @@ async function agregarProfesional(){
   if(!nombre){showToast('Ingresá el nombre',false);return;}
   showLoading('Guardando...');
   try{
-    var data=await sbPost('profesionales',{nombre:nombre,activo:true});
+    var foto=document.getElementById('ap-foto').value.trim();var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:foto||null});
     profesionales.push(data[0]);
     toggleAddProfesional();
     renderProfesionales();
@@ -1407,7 +1416,10 @@ function renderProfesionales(){
   profesionales.forEach(function(p){
     var el=document.createElement('div');
     el.className='srv-row';
-    el.innerHTML='<div class="srv-nm">'+san(p.nombre)+'</div>'
+    var avatarHtml=p.foto_url
+      ?'<img src="'+san(p.foto_url)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid var(--border);flex-shrink:0;"/>'
+      :'<div style="width:36px;height:36px;border-radius:50%;background:var(--g2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;">'+san(p.nombre.slice(0,2).toUpperCase())+'</div>';
+    el.innerHTML=avatarHtml+'<div class="srv-nm" style="flex:1;">'+san(p.nombre)+'</div>'
       +'<button class="ia" style="color:var(--danger);border-color:rgba(226,75,74,0.3);" onclick="elimProfesional('+p.id+')" translate="no">×</button>';
     c.appendChild(el);
   });
