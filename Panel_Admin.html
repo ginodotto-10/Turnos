@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
@@ -229,6 +229,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
 .toast.show{display:block;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -251,6 +252,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="fg"><label>Usuario</label><input type="text" id="l-user" placeholder="admin" maxlength="30" autocomplete="username"/></div>
     <div class="fg"><label>Contrase&#241;a</label><input type="password" id="l-pass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" maxlength="50" autocomplete="current-password"/></div>
     <button class="btn-login" onclick="doLogin()">Ingresar al panel</button>
+    <div style="text-align:center;margin-top:14px;">
+      <a href="#" onclick="mostrarRecuperar();return false;" style="font-size:12px;color:rgba(255,255,255,0.6);text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:1px;">&iquest;Olvidaste tu contrase&ntilde;a?</a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECUPERAR -->
+<div id="mod-recuperar" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <div style="font-size:18px;font-weight:600;color:var(--txt);margin-bottom:6px;">&#128272; Recuperar contrase&#241;a</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Ingres&#225; tu email y te enviamos tus datos de acceso.</div>
+    <div id="rec-msg" style="display:none;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;"></div>
+    <div class="fg">
+      <label>Email</label>
+      <input type="email" id="rec-email" placeholder="tucorreo@gmail.com" maxlength="100" style="width:100%;padding:11px 14px;border:0.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;"/>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn-sec" style="flex:1;" onclick="cerrarRecuperar()">Cancelar</button>
+      <button class="btn-main" style="flex:1;" onclick="enviarRecuperacion()">Enviar</button>
+    </div>
   </div>
 </div>
 
@@ -260,7 +281,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="tb-left">
       <h1 id="tp-nombre">Panel del local</h1>
       <p id="tp-fecha"></p>
-      <p id="tp-hora" style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;font-variant-numeric:tabular-nums;"></p>
     </div>
     <div style="display:flex;align-items:center;">
       <div class="ing-hoy"><strong id="tp-ing">$0</strong><span>hoy</span></div>
@@ -284,6 +304,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <button class="tab" onclick="goTab('t-pagos',this)">Pagos</button>
     <button class="tab" onclick="goTab('t-stats',this)">Stats</button>
     <button class="tab" onclick="goTab('t-exportar',this)">Exportar</button>
+    <button class="tab" onclick="goTab('t-profesionales',this)">Profesionales</button>
     <button class="tab" onclick="goTab('t-config',this)">&#9881; Config</button>
   </div>
 
@@ -468,6 +489,49 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     </div>
   </div>
 
+  <!-- PROFESIONALES -->
+  <div class="sec" id="t-profesionales">
+    <div class="sec-hd"><h2>Profesionales</h2><button class="btn-add" onclick="toggleAddProfesional()">+ Agregar</button></div>
+    <div class="add-form" id="add-prof-form">
+      <h4>Nuevo profesional</h4>
+      <div class="fg"><label>Nombre</label><input id="ap-nombre" type="text" placeholder="Ej: Laura G." maxlength="50"/></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sec" onclick="toggleAddProfesional()">Cancelar</button>
+        <button class="btn-main" style="flex:1;" onclick="agregarProfesional()">Guardar</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Los profesionales aparecen en la página del cliente para que elijan con quién atenderse.</p>
+    <div id="prof-list"></div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">Usuarios del panel</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Cada profesional puede tener su propio usuario para ver sus turnos.</p>
+      <div id="usuarios-list"></div>
+      <button class="btn-add" style="margin-top:10px;" onclick="toggleAddUsuario()">+ Agregar usuario</button>
+      <div class="add-form" id="add-usuario-form" style="margin-top:10px;">
+        <h4>Nuevo usuario</h4>
+        <div class="fg"><label>Usuario</label><input id="au-usuario" type="text" placeholder="Ej: laura" maxlength="30"/></div>
+        <div class="fg"><label>Contraseña</label><input id="au-password" type="text" placeholder="Ej: 1234" maxlength="30"/></div>
+        <div class="fg"><label>Email (para recuperar contraseña)</label><input id="au-email" type="email" placeholder="Ej: laura@gmail.com" maxlength="100"/></div>
+        <div class="fg"><label>Rol</label>
+          <select id="au-rol" style="width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+            <option value="admin">Admin (ve todos los turnos)</option>
+            <option value="profesional">Profesional (ve solo sus turnos)</option>
+          </select>
+        </div>
+        <div class="fg" id="au-prof-wrap"><label>Profesional asociado</label>
+          <select id="au-profesional" style="width:100%;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+            <option value="">-- Seleccionar --</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sec" onclick="toggleAddUsuario()">Cancelar</button>
+          <button class="btn-main" style="flex:1;" onclick="agregarUsuario()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- CONFIG -->
   <div class="sec" id="t-config">
     <div class="sec-hd"><h2>Configuraci&#243;n general</h2></div>
@@ -635,13 +699,14 @@ function showToast(msg,ok){
 /* ==========================================
    ESTADO GLOBAL
    ========================================== */
-var sesion={id:null,usuario:'',password:''};
+var sesion={id:null,usuario:'',password:'',rol:'admin',profesional_id:null};
 var turnos=[];
 var servicios=[];
 var clientes=[];
 var galeria=[];
 var metodos=[];
 var configNeg={};
+var profesionales=[];
 var horarios={diasActivos:[1,2,3,4,5,6],franjas:[{desde:'09:00',hasta:'12:00'},{desde:'14:00',hasta:'19:00'}],durTurno:30,feriados:[]};
 var activeTId=null;
 var iconoSel='&#128179;';
@@ -650,6 +715,55 @@ var ICONOS=['&#128179;','&#128180;','&#128181;','&#128247;','&#128184;','&#12817
 /* ==========================================
    LOGIN
    ========================================== */
+/* EmailJS */
+var EMAILJS_SERVICE='service_k5ef3zs';
+var EMAILJS_TEMPLATE='template_xieqo5k';
+var EMAILJS_KEY='4vqQ6S3lIe5DTAZbN';
+
+function mostrarRecuperar(){
+  document.getElementById('mod-recuperar').style.display='flex';
+  document.getElementById('rec-email').value='';
+  document.getElementById('rec-msg').style.display='none';
+}
+
+function cerrarRecuperar(){
+  document.getElementById('mod-recuperar').style.display='none';
+}
+
+async function enviarRecuperacion(){
+  var email=document.getElementById('rec-email').value.trim();
+  var msg=document.getElementById('rec-msg');
+  if(!email){
+    msg.style.background='#FCEBEB';msg.style.color='#791F1F';
+    msg.textContent='Por favor ingresá tu email.';
+    msg.style.display='block';return;
+  }
+  try{
+    var data=await sbGet('usuarios','email=eq.'+encodeURIComponent(email)+'&select=usuario,password,email&limit=1');
+    if(!data||data.length===0){
+      msg.style.background='#FCEBEB';msg.style.color='#791F1F';
+      msg.textContent='No encontramos una cuenta con ese email.';
+      msg.style.display='block';return;
+    }
+    var u=data[0];
+    await emailjs.send(EMAILJS_SERVICE,EMAILJS_TEMPLATE,{
+      nombre:u.usuario,
+      usuario:u.usuario,
+      password:u.password,
+      email:email
+    },EMAILJS_KEY);
+    msg.style.background='#E8F5E9';msg.style.color='#1B5E20';
+    msg.textContent='✓ Email enviado! Revisá tu bandeja de entrada.';
+    msg.style.display='block';
+    document.getElementById('rec-email').disabled=true;
+    setTimeout(cerrarRecuperar,3000);
+  }catch(e){
+    msg.style.background='#FCEBEB';msg.style.color='#791F1F';
+    msg.textContent='Error al enviar. Intentá de nuevo.';
+    msg.style.display='block';
+  }
+}
+
 /* Rate limiting login */
 var _loginAttempts=0,_loginBlocked=false,_loginTimer=null;
 
@@ -669,10 +783,10 @@ async function doLogin(){
   document.getElementById('login-err').style.display='none';
   document.getElementById('login-loading').style.display='block';
   try {
-    var data=await sbGet('usuarios','usuario=eq.'+encodeURIComponent(u)+'&select=id,usuario,password&limit=1');
+    var data=await sbGet('usuarios','usuario=eq.'+encodeURIComponent(u)+'&select=id,usuario,password,rol,profesional_id&limit=1');
     if(data&&data.length>0&&data[0].password===p){
       _loginAttempts=0;
-      sesion={id:data[0].id,usuario:u,password:p};
+      sesion={id:data[0].id,usuario:u,password:p,rol:data[0].rol||'admin',profesional_id:data[0].profesional_id||null};
       document.getElementById('login').style.display='none';
       document.getElementById('panel').style.display='block';
       await initPanel();
@@ -717,15 +831,6 @@ window.addEventListener('load',function(){
 async function initPanel(){
   showLoading('Cargando datos...');
   document.getElementById('tp-fecha').textContent=fmtFecha(TODAY);
-  function actualizarHora(){
-    var now=new Date();
-    var h=now.getHours().toString().padStart(2,'0');
-    var m=now.getMinutes().toString().padStart(2,'0');
-    var s=now.getSeconds().toString().padStart(2,'0');
-    document.getElementById('tp-hora').textContent=h+':'+m+':'+s;
-  }
-  actualizarHora();
-  setInterval(actualizarHora,1000);
   document.getElementById('exp-desde').value=TODAY;
   document.getElementById('exp-hasta').value=TODAY;
   try {
@@ -736,7 +841,8 @@ async function initPanel(){
       cargarGaleria(),
       cargarConfig(),
       cargarMetodos(),
-      cargarResenas()
+      cargarResenas(),
+      cargarProfesionales()
     ]);
     renderHoy();
     updateMetrics();
@@ -751,7 +857,11 @@ async function initPanel(){
    ========================================== */
 async function cargarTurnos(){
   /* Consultas separadas para evitar problemas con JOIN y RLS */
-  var dataTurnos=await sbGet('turnos','order=fecha.desc,hora.asc');
+  var filtroTurnos='order=fecha.desc,hora.asc';
+  if(sesion.rol==='profesional'&&sesion.profesional_id){
+    filtroTurnos='profesional_id=eq.'+sesion.profesional_id+'&order=fecha.desc,hora.asc';
+  }
+  var dataTurnos=await sbGet('turnos',filtroTurnos);
   var dataClientes=await sbGet('clientes','');
   var dataServicios=await sbGet('servicios','');
 
@@ -776,7 +886,9 @@ async function cargarTurnos(){
       hora:t.hora?t.hora.slice(0,5):'',
       estado:t.estado||'confirmado',
       cliente_id:t.cliente_id,
-      servicio_id:t.servicio_id
+      servicio_id:t.servicio_id,
+      profesional_id:t.profesional_id||null,
+      profesional_nombre:t.profesional_nombre||''
     };
   });
 }
@@ -843,6 +955,7 @@ function goTab(id,btn){
     't-pagos':function(){renderMetodos();},
     't-stats':function(){renderStats();},
     't-exportar':function(){},
+    't-profesionales':function(){renderProfesionales();renderUsuariosList();},
     't-config':function(){renderConfig();}
   };
   if(renders[id]) renders[id]();
@@ -909,7 +1022,7 @@ function mkRow(t,i){
   r.innerHTML='<div class="tr-hora"><div class="h">'+san(t.hora||'-')+'</div><div class="m">'+(t.dur||0)+'min</div></div>'
     +'<div class="tr-sep"></div>'
     +'<div class="tr-info"><div class="tr-name">'+nombre+'</div>'
-    +'<div class="tr-det">'+servicio+' &middot; '+fecha+'</div>'
+    +'<div class="tr-det">'+servicio+(t.profesional_nombre?' &middot; '+san(t.profesional_nombre):'')+' &middot; '+fecha+'</div>'
     +(t.notas?'<div class="tr-nota">'+san(t.notas)+'</div>':'')
     +'</div>'
     +'<span class="badge '+(t.estado==='ausente'?'b-aus':fut?'b-ok':'b-warn')+'">'+(t.estado==='ausente'?'ausente':fut?'ok':'pasado')+'</span>'
@@ -1223,6 +1336,131 @@ async function confirmarReprogramar(){
     }
   } catch(e){showToast('Error: '+e.message, false);}
   hideLoading();
+}
+
+/* ==========================================
+   PROFESIONALES Y USUARIOS
+   ========================================== */
+async function cargarProfesionales(){
+  try{ profesionales=await sbGet('profesionales','order=id.asc')||[]; }
+  catch(e){ profesionales=[]; }
+}
+
+function toggleAddProfesional(){
+  var f=document.getElementById('add-prof-form');
+  f.classList.toggle('open');
+  if(f.classList.contains('open')) document.getElementById('ap-nombre').value='';
+}
+
+function toggleAddUsuario(){
+  var f=document.getElementById('add-usuario-form');
+  f.classList.toggle('open');
+  if(f.classList.contains('open')){
+    document.getElementById('au-usuario').value='';
+    document.getElementById('au-password').value='';
+    document.getElementById('au-email').value='';
+    document.getElementById('au-rol').value='admin';
+    // Populate profesionales dropdown
+    var sel=document.getElementById('au-profesional');
+    sel.innerHTML='<option value="">-- Seleccionar --</option>';
+    profesionales.filter(function(p){return p.activo;}).forEach(function(p){
+      sel.innerHTML+='<option value="'+p.id+'">'+san(p.nombre)+'</option>';
+    });
+    document.getElementById('au-prof-wrap').style.display='block';
+  }
+}
+
+async function agregarProfesional(){
+  var nombre=document.getElementById('ap-nombre').value.trim();
+  if(!nombre){showToast('Ingresá el nombre',false);return;}
+  showLoading('Guardando...');
+  try{
+    var data=await sbPost('profesionales',{nombre:nombre,activo:true});
+    profesionales.push(data[0]);
+    toggleAddProfesional();
+    renderProfesionales();
+    showToast('✓ Profesional agregado');
+  }catch(e){showToast('Error: '+e.message,false);}
+  hideLoading();
+}
+
+async function elimProfesional(id){
+  showConfirm('¿Eliminars el profesional?','Los turnos existentes no se verán afectados.',async function(){
+    showLoading('Eliminando...');
+    try{
+      await sbDelete('profesionales','id=eq.'+id);
+      profesionales=profesionales.filter(function(p){return p.id!==id;});
+      renderProfesionales();
+      showToast('✓ Profesional eliminado');
+    }catch(e){showToast('Error: '+e.message,false);}
+    hideLoading();
+  });
+}
+
+function renderProfesionales(){
+  var c=document.getElementById('prof-list');
+  if(!profesionales.length){
+    c.innerHTML='<div class="empty">No hay profesionales. Agregá el primero.</div>';
+    return;
+  }
+  c.innerHTML='';
+  profesionales.forEach(function(p){
+    var el=document.createElement('div');
+    el.className='srv-row';
+    el.innerHTML='<div class="srv-nm">'+san(p.nombre)+'</div>'
+      +'<button class="ia" style="color:var(--danger);border-color:rgba(226,75,74,0.3);" onclick="elimProfesional('+p.id+')" translate="no">×</button>';
+    c.appendChild(el);
+  });
+}
+
+async function renderUsuariosList(){
+  var data=await sbGet('usuarios','order=id.asc')||[];
+  var c=document.getElementById('usuarios-list');
+  if(!data.length){c.innerHTML='<div class="empty">No hay usuarios.</div>';return;}
+  c.innerHTML='';
+  data.forEach(function(u){
+    var profNombre='';
+    if(u.profesional_id){
+      var p=profesionales.find(function(x){return x.id===u.profesional_id;});
+      if(p) profNombre=' — '+p.nombre;
+    }
+    var el=document.createElement('div');
+    el.className='srv-row';
+    el.innerHTML='<div><div class="srv-nm">'+san(u.usuario)+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);">'+(u.rol==='admin'?'Admin':'Profesional')+san(profNombre)+'</div></div>'
+      +(u.usuario!=='admin'?'<button class="ia" style="color:var(--danger);border-color:rgba(226,75,74,0.3);" onclick="elimUsuario('+u.id+')" translate="no">×</button>':'');
+    c.appendChild(el);
+  });
+}
+
+async function agregarUsuario(){
+  var usuario=document.getElementById('au-usuario').value.trim();
+  var password=document.getElementById('au-password').value.trim();
+  var email=document.getElementById('au-email').value.trim();
+  var rol=document.getElementById('au-rol').value;
+  var profId=document.getElementById('au-profesional').value;
+  if(!usuario||!password){showToast('Completá usuario y contraseña',false);return;}
+  if(rol==='profesional'&&!profId){showToast('Seleccioná el profesional asociado',false);return;}
+  showLoading('Creando usuario...');
+  try{
+    await sbPost('usuarios',{usuario:usuario,password:password,email:email||null,rol:rol,profesional_id:profId?parseInt(profId):null});
+    toggleAddUsuario();
+    renderUsuariosList();
+    showToast('✓ Usuario creado');
+  }catch(e){showToast('Error: '+e.message,false);}
+  hideLoading();
+}
+
+async function elimUsuario(id){
+  showConfirm('¿Eliminar este usuario?','El profesional asociado no se verá afectado.',async function(){
+    showLoading('Eliminando...');
+    try{
+      await sbDelete('usuarios','id=eq.'+id);
+      renderUsuariosList();
+      showToast('✓ Usuario eliminado');
+    }catch(e){showToast('Error: '+e.message,false);}
+    hideLoading();
+  });
 }
 
 /* ==========================================

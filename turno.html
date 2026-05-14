@@ -138,9 +138,9 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
 <div class="steps-wrap">
   <div class="steps-bar">
     <div class="step-item active" id="si1"><div class="step-num">1</div><div>Servicio</div></div>
-    <div class="step-item" id="si2"><div class="step-num">2</div><div>Fecha</div></div>
-    <div class="step-item" id="si3"><div class="step-num">3</div><div>Datos</div></div>
-    <div class="step-item" id="si4"><div class="step-num">4</div><div>Listo</div></div>
+    <div class="step-item" id="si2"><div class="step-num">2</div><div>Profesional</div></div>
+    <div class="step-item" id="si3"><div class="step-num">3</div><div>Fecha</div></div>
+    <div class="step-item" id="si4"><div class="step-num">4</div><div>Datos</div></div>
   </div>
 </div>
 
@@ -155,11 +155,23 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
         <div style="grid-column:span 2;text-align:center;color:var(--muted);font-size:13px;padding:20px;">Cargando servicios...</div>
       </div>
     </div>
-    <button class="btn-main" id="btn-s1" disabled onclick="goStep(2)">Elegir fecha &#8594;</button>
+    <button class="btn-main" id="btn-s1" disabled onclick="goStep(2)">Elegir profesional &#8594;</button>
   </div>
 
-  <!-- PASO 2: FECHA -->
+  <!-- PASO 2: PROFESIONAL -->
   <div class="step-panel" id="sp2">
+    <div class="card">
+      <div class="card-title">Elegí tu profesional</div>
+      <div id="prof-grid" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div>
+    </div>
+    <div class="flex-row">
+      <button class="btn-sec" onclick="goStep(1)">← Volver</button>
+      <button class="btn-main" id="btn-s2" disabled onclick="goStep(3)">Elegir fecha →</button>
+    </div>
+  </div>
+
+  <!-- PASO 3: FECHA -->
+  <div class="step-panel" id="sp3-cal">
     <div class="cal-card">
       <div class="cal-head">
         <button class="cal-arr" onclick="cChangeWeek(-1)">&#8249;</button>
@@ -171,13 +183,13 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
       <div class="slots-grid" id="c-slots"></div>
     </div>
     <div class="flex-row">
-      <button class="btn-sec" onclick="goStep(1)">&#8592; Volver</button>
-      <button class="btn-main" id="btn-s2" disabled onclick="goStep(3)">Continuar &#8594;</button>
+      <button class="btn-sec" onclick="goStep(2)">← Volver</button>
+      <button class="btn-main" id="btn-s3-cal" disabled onclick="goStep(3)">Continuar →</button>
     </div>
   </div>
 
-  <!-- PASO 3: DATOS -->
-  <div class="step-panel" id="sp3">
+  <!-- PASO 4: DATOS -->
+  <div class="step-panel" id="sp4-datos">
     <div class="resumen" id="c-resumen"></div>
     <div class="card">
       <div class="card-title">Tus datos</div>
@@ -192,13 +204,13 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
       <div class="error-msg" id="form-error"></div>
     </div>
     <div class="flex-row">
-      <button class="btn-sec" onclick="goStep(2)">&#8592; Volver</button>
-      <button class="btn-main" id="btn-s3" onclick="confirmar()">Confirmar turno</button>
+      <button class="btn-sec" onclick="goStep(3)">← Volver</button>
+      <button class="btn-main" id="btn-s4" onclick="confirmar()">Confirmar turno</button>
     </div>
   </div>
 
-  <!-- PASO 4: CONFIRMADO -->
-  <div class="step-panel" id="sp4">
+  <!-- PASO 5: CONFIRMADO -->
+  <div class="step-panel" id="sp5-confirm">
     <div class="confirm-wrap">
       <div class="check-big"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       <h2>&#161;Turno confirmado!</h2>
@@ -234,16 +246,19 @@ function fmtF(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{
 
 var TODAY=new Date().toISOString().split('T')[0];
 var DIAS=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
-var cWeekOff=0,cSelDate='',cSelSlot='',cSelSrv=null,lastT=null;
+var cWeekOff=0,cSelDate='',cSelSlot='',cSelSrv=null,cSelProf=null,lastT=null;
 var servicios=[],turnosOcupados=[],telNegocio='';
 var feriadosFechas=[];
+var profesionales=[];
 
 async function initApp(){
   try {
-    var [dataSrv,dataCfg]=await Promise.all([
+    var [dataSrv,dataCfg,dataProf]=await Promise.all([
       sbGet('servicios','activo=eq.true&order=id.asc'),
-      sbGet('configuracion','')
+      sbGet('configuracion',''),
+      sbGet('profesionales','activo=eq.true&order=id.asc')
     ]);
+    profesionales=dataProf||[];
     servicios=dataSrv.map(function(s){return{id:s.id,nombre:s.nombre,dur:s.duracion,precio:s.precio,ic:s.icono||s.nombre.slice(0,2).toUpperCase()};});
     var cfg={};dataCfg.forEach(function(c){cfg[c.clave]=c.valor;});
     if(cfg.nombre_negocio){
@@ -328,7 +343,7 @@ function renderCWeek(){
     var div=document.createElement('div');
     div.className='wk-day'+(isPast&&!isFeriado?' past':'')+(isFeriado?' feriado':'')+(ds===TODAY?' today':'')+(ds===cSelDate?' sel-day':'')+(haT&&!bloqueado?' has-t':'');
     div.innerHTML='<div class="dn" translate="no">'+san(DIAS[d.getDay()])+'</div><div class="dd">'+parseInt(d.getDate())+'</div>'+(isFeriado?'<span class="feriado-lbl" translate="no">FERIADO</span>':'');
-    if(!bloqueado) div.onclick=function(){cSelDate=ds;cSelSlot='';document.getElementById('btn-s2').disabled=true;renderCWeek();renderCSlots();};
+    if(!bloqueado) div.onclick=function(){cSelDate=ds;cSelSlot='';document.getElementById('btn-s3-cal').disabled=true;renderCWeek();renderCSlots();};
     row.appendChild(div);
   });
 }
@@ -338,12 +353,19 @@ function renderCSlots(){
   var occ=turnosOcupados.filter(function(t){return t.fecha===cSelDate;}).map(function(t){return t.hora;});
   document.getElementById('c-slots-lbl').textContent=cSelDate?'Horarios disponibles - '+fmtF(cSelDate):'Selecci\u00f3n un d\u00eda para ver horarios';
   var wrap=document.getElementById('c-slots');wrap.innerHTML='';
+  var now=new Date();
+  var horaActual=now.getHours()*60+now.getMinutes();
   SLOTS.forEach(function(s){
+    if(cSelDate===TODAY){
+      var partes=s.split(':');
+      var slotMin=parseInt(partes[0])*60+parseInt(partes[1]);
+      if(slotMin<=horaActual) return;
+    }
     var o=occ.includes(s);
     var div=document.createElement('div');
     div.className='slot'+(o?' occ':'')+(s===cSelSlot?' sel-slot':'');
     div.textContent=s;
-    if(!o) div.onclick=function(){cSelSlot=s;renderCSlots();document.getElementById('btn-s2').disabled=false;};
+    if(!o) div.onclick=function(){cSelSlot=s;renderCSlots();document.getElementById('btn-s3-cal').disabled=false;};
     wrap.appendChild(div);
   });
 }
@@ -355,15 +377,44 @@ async function cChangeWeek(d){
 }
 
 function goStep(n){
+  var panels=['sp1','sp2','sp3-cal','sp4-datos','sp5-confirm'];
+  panels.forEach(function(pid,i){
+    var el=document.getElementById(pid);
+    if(el) el.classList.toggle('active',i+1===n);
+  });
   for(var i=1;i<=4;i++){
-    document.getElementById('sp'+i).classList.toggle('active',i===n);
     var si=document.getElementById('si'+i);
+    if(!si) continue;
     si.classList.remove('active','done');
     if(i===n) si.classList.add('active');
     else if(i<n) si.classList.add('done');
   }
-  if(n===3) renderResumen();
+  if(n===2) renderProfGrid();
+  if(n===4) renderResumen();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderProfGrid(){
+  var c=document.getElementById('prof-grid');
+  if(!profesionales||!profesionales.length){
+    c.innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No hay profesionales disponibles.</div>';
+    return;
+  }
+  c.innerHTML='';
+  profesionales.filter(function(p){return p.activo;}).forEach(function(p){
+    var sel=cSelProf&&cSelProf.id===p.id;
+    var el=document.createElement('div');
+    el.style.cssText='padding:14px 16px;border-radius:12px;border:1.5px solid '+(sel?'var(--g2)':'var(--border)')+';background:'+(sel?'var(--g5)':'#fff')+';cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.2s;';
+    el.innerHTML='<div style="width:38px;height:38px;border-radius:50%;background:var(--g2);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;">'+san(p.nombre.slice(0,2).toUpperCase())+'</div>'
+      +'<div style="font-size:14px;font-weight:500;color:var(--txt);">'+san(p.nombre)+'</div>'
+      +(sel?'<div style="margin-left:auto;color:var(--g2);">&#10003;</div>':'');
+    el.onclick=function(){
+      cSelProf=p;
+      document.getElementById('btn-s2').disabled=false;
+      renderProfGrid();
+    };
+    c.appendChild(el);
+  });
 }
 
 function renderResumen(){
@@ -371,6 +422,7 @@ function renderResumen(){
   document.getElementById('c-resumen').innerHTML=
     '<h3>Tu turno</h3>'
     +'<div class="sum-row"><span class="sum-lbl">Servicio</span><span class="sum-val">'+san(cSelSrv.nombre)+'</span></div>'
+    +(cSelProf?'<div class="sum-row"><span class="sum-lbl">Profesional</span><span class="sum-val">'+san(cSelProf.nombre)+'</span></div>':'')
     +'<div class="sum-row"><span class="sum-lbl">Duraci\u00f3n</span><span class="sum-val">'+parseInt(cSelSrv.dur)+' min</span></div>'
     +'<div class="sum-row"><span class="sum-lbl">Fecha</span><span class="sum-val">'+fmtF(cSelDate)+'</span></div>'
     +'<div class="sum-row"><span class="sum-lbl">Hora</span><span class="sum-val">'+cSelSlot+'</span></div>'
@@ -415,13 +467,14 @@ async function confirmar(){
       goStep(2);return;
     }
     var cData=await sbPost('clientes',{nombre:nombre,apellido:apellido,telefono:tel.replace(/\D/g,'').slice(0,15),email:email||null,notas:notas||null});
-    await sbPost('turnos',{cliente_id:cData[0].id,servicio_id:cSelSrv.id,fecha:cSelDate,hora:cSelSlot,estado:'confirmado',precio:cSelSrv.precio});
+    await sbPost('turnos',{cliente_id:cData[0].id,servicio_id:cSelSrv.id,fecha:cSelDate,hora:cSelSlot,estado:'confirmado',precio:cSelSrv.precio,profesional_id:cSelProf?cSelProf.id:null,profesional_nombre:cSelProf?cSelProf.nombre:null});
     lastT={nombre:nombre,apellido:apellido,tel:tel.replace(/\D/g,'').slice(0,15),servicio:cSelSrv.nombre,fecha:cSelDate,hora:cSelSlot,precio:cSelSrv.precio};
     turnosOcupados.push({fecha:cSelDate,hora:cSelSlot});
     document.getElementById('c-confirm-detail').innerHTML=
       '<h3>Resumen</h3>'
       +'<div class="sum-row"><span class="sum-lbl">Cliente</span><span class="sum-val">'+san(nombre)+' '+san(apellido)+'</span></div>'
       +'<div class="sum-row"><span class="sum-lbl">Servicio</span><span class="sum-val">'+san(cSelSrv.nombre)+'</span></div>'
+    +(cSelProf?'<div class="sum-row"><span class="sum-lbl">Profesional</span><span class="sum-val">'+san(cSelProf.nombre)+'</span></div>':'')
       +'<div class="sum-row"><span class="sum-lbl">Fecha</span><span class="sum-val">'+fmtF(cSelDate)+'</span></div>'
       +'<div class="sum-row"><span class="sum-lbl">Hora</span><span class="sum-val">'+cSelSlot+'</span></div>'
       +'<div class="sum-row"><span class="sum-lbl">Total</span><span class="sum-val">$'+parseInt(cSelSrv.precio).toLocaleString('es-AR')+'</span></div>';
@@ -439,7 +492,8 @@ function abrirWA(){
 }
 
 function resetForm(){
-  cSelSrv=null;cSelDate='';cSelSlot='';lastT=null;cWeekOff=0;
+  cSelSrv=null;
+  cSelProf=null;cSelDate='';cSelSlot='';lastT=null;cWeekOff=0;
   ['c-nombre','c-apellido','c-tel','c-email','c-notas'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('btn-s1').disabled=true;
   document.getElementById('btn-s2').disabled=true;
