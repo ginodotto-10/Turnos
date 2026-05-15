@@ -495,7 +495,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="add-form" id="add-prof-form">
       <h4>Nuevo profesional</h4>
       <div class="fg"><label>Nombre</label><input id="ap-nombre" type="text" placeholder="Ej: Laura G." maxlength="50"/></div>
-      <div class="fg"><label>Foto (URL de imagen, opcional)</label><input id="ap-foto" type="url" placeholder="https://..." maxlength="500"/></div>
+      <div class="fg" id="ap-foto-wrap">
+        <label>Foto de perfil <span style="font-weight:400;text-transform:none;font-size:11px;">(opcional)</span></label>
+        <div id="ap-foto-preview" style="display:none;margin-bottom:8px;text-align:center;">
+          <img id="ap-foto-img" src="" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--g3);"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;" id="ap-foto-nombre"></div>
+        </div>
+        <div onclick="document.getElementById('ap-foto-input').click()" style="border:1.5px dashed var(--g3);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#fff;">
+          <div style="font-size:22px;">📷</div>
+          <div style="font-size:12px;font-weight:500;color:var(--g2);margin-top:4px;" id="ap-foto-txt">Elegir foto</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG — máx 2 MB</div>
+        </div>
+        <input type="file" id="ap-foto-input" accept="image/*" style="display:none;" onchange="prevFotoProfesional(this)"/>
+      </div>
       <div style="display:flex;gap:8px;">
         <button class="btn-sec" onclick="toggleAddProfesional()">Cancelar</button>
         <button class="btn-main" style="flex:1;" onclick="agregarProfesional()">Guardar</button>
@@ -1358,7 +1370,13 @@ async function cargarProfesionales(){
 function toggleAddProfesional(){
   var f=document.getElementById('add-prof-form');
   f.classList.toggle('open');
-  if(f.classList.contains('open')){document.getElementById('ap-nombre').value='';document.getElementById('ap-foto').value='';}
+  if(f.classList.contains('open')){
+    document.getElementById('ap-nombre').value='';
+    document.getElementById('ap-foto-input').value='';
+    document.getElementById('ap-foto-preview').style.display='none';
+    document.getElementById('ap-foto-txt').textContent='Elegir foto';
+    window._apFotoFile=null;
+  }
 }
 
 function toggleAddUsuario(){
@@ -1379,16 +1397,43 @@ function toggleAddUsuario(){
   }
 }
 
+function prevFotoProfesional(input){
+  var f=input.files[0];
+  if(!f) return;
+  if(!f.type.startsWith('image/')||f.size>2*1024*1024){showToast('Solo imágenes hasta 2 MB',false);input.value='';return;}
+  window._apFotoFile=f;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('ap-foto-img').src=e.target.result;
+    document.getElementById('ap-foto-preview').style.display='block';
+    document.getElementById('ap-foto-nombre').textContent=f.name;
+    document.getElementById('ap-foto-txt').textContent='Cambiar foto';
+  };
+  reader.readAsDataURL(f);
+}
+
 async function agregarProfesional(){
   var nombre=document.getElementById('ap-nombre').value.trim();
   if(!nombre){showToast('Ingresá el nombre',false);return;}
   showLoading('Guardando...');
   try{
-    var foto=document.getElementById('ap-foto').value.trim();var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:foto||null});
+    var fotoUrl=null;
+    if(window._apFotoFile){
+      var f=window._apFotoFile;
+      var nombre2='prof_'+Date.now()+'_'+f.name.replace(/[^a-zA-Z0-9.]/g,'_');
+      var resS=await fetch(SB_URL+'/storage/v1/object/profesionales/'+nombre2,{
+        method:'POST',
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':f.type,'x-upsert':'true'},
+        body:f
+      });
+      if(resS.ok) fotoUrl=SB_URL+'/storage/v1/object/public/profesionales/'+nombre2;
+    }
+    var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:fotoUrl});
     profesionales.push(data[0]);
+    window._apFotoFile=null;
     toggleAddProfesional();
     renderProfesionales();
-    showToast('✓ Profesional agregado');
+    showToast('\u2713 Profesional agregado');
   }catch(e){showToast('Error: '+e.message,false);}
   hideLoading();
 }

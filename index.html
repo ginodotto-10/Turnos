@@ -393,8 +393,7 @@ function initGalCarousel(items){
   }
   track.innerHTML=items.map(function(item){
     return '<div class="gal-slide">'
-      +'<img src="'+san(item.url)+'" alt="'+san(item.etiqueta||'')+'" loading="lazy"/>'
-      +(item.etiqueta?'<div class="gal-lbl">'+san(item.etiqueta)+'</div>':'')
+      +'<img src="'+san(item.url)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;"/>'
       +'</div>';
   }).join('');
   dots.innerHTML=items.map(function(_,i){
