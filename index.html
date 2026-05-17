@@ -52,10 +52,10 @@ section{padding:56px 24px;}
 /* SERVICIOS */
 .sec-srv{background:var(--white);}
 .srv-list{display:flex;flex-direction:column;gap:9px;}
-.srv-card{background:var(--white);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);position:relative;overflow:hidden;cursor:pointer;transition:border-color 0.2s;}
+.srv-card{background:var(--white);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;border:1px solid var(--border);position:relative;overflow:hidden;cursor:default;}
 .srv-card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:linear-gradient(180deg,var(--g3),var(--g4));}
-.srv-card:hover{border-color:var(--g3);transform:translateY(-2px);}
-.srv-card:active{border-color:var(--g3);transform:scale(0.98);}
+.srv-card:hover{}
+.srv-card:active{}
 .srv-ic{width:40px;height:40px;border-radius:10px;background:var(--g5);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--g2);flex-shrink:0;}
 .srv-nm{font-size:13px;font-weight:500;}
 .srv-dt{font-size:11px;color:var(--muted);margin-top:1px;}
@@ -589,7 +589,7 @@ async function initApp(){
       srvList.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Sin servicios disponibles</div>';
     } else {
       srvList.innerHTML=dataSrv.map(function(s){
-        return '<div class="srv-card" onclick="window.location.href=\'turno.html\'">'
+        return '<div class="srv-card">'
           +'<div class="srv-ic">'+san(s.icono||s.nombre.slice(0,2).toUpperCase())+'</div>'
           +'<div style="flex:1;"><div class="srv-nm">'+san(s.nombre)+'</div><div class="srv-dt">'+parseInt(s.duracion)+' minutos</div></div>'
           +'<div class="srv-pr">$'+parseInt(s.precio).toLocaleString('es-AR')+'</div>'

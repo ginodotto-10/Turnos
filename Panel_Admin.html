@@ -281,6 +281,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="tb-left">
       <h1 id="tp-nombre">Panel del local</h1>
       <p id="tp-fecha"></p>
+      <p id="tp-hora" style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;"></p>
     </div>
     <div style="display:flex;align-items:center;">
       <div class="ing-hoy"><strong id="tp-ing">$0</strong><span>hoy</span></div>
@@ -504,7 +505,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
         <div onclick="document.getElementById('ap-foto-input').click()" style="border:1.5px dashed var(--g3);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#fff;">
           <div style="font-size:22px;">📷</div>
           <div style="font-size:12px;font-weight:500;color:var(--g2);margin-top:4px;" id="ap-foto-txt">Elegir foto</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG — máx 2 MB</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG — máx 5 MB</div>
         </div>
         <input type="file" id="ap-foto-input" accept="image/*" style="display:none;" onchange="prevFotoProfesional(this)"/>
       </div>
@@ -1370,7 +1371,12 @@ async function cargarProfesionales(){
 function toggleAddProfesional(){
   var f=document.getElementById('add-prof-form');
   f.classList.toggle('open');
-  if(f.classList.contains('open')){document.getElementById('ap-nombre').value='';document.getElementById('ap-foto').value='';}
+  if(f.classList.contains('open')){
+    document.getElementById('ap-nombre').value='';
+    document.getElementById('ap-foto-input').value='';
+    document.getElementById('ap-foto-preview').style.display='none';
+    document.getElementById('ap-foto-txt').textContent='Elegir foto';
+  }
 }
 
 function toggleAddUsuario(){
@@ -1391,12 +1397,37 @@ function toggleAddUsuario(){
   }
 }
 
+function prevFotoProfesional(input){
+  if(!input.files||!input.files[0]) return;
+  var file=input.files[0];
+  if(file.size>5*1024*1024){showToast('La foto no puede superar 5 MB',false);input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('ap-foto-img').src=e.target.result;
+    document.getElementById('ap-foto-preview').style.display='block';
+    document.getElementById('ap-foto-txt').textContent=file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
 async function agregarProfesional(){
   var nombre=document.getElementById('ap-nombre').value.trim();
   if(!nombre){showToast('Ingresá el nombre',false);return;}
   showLoading('Guardando...');
   try{
-    var foto=document.getElementById('ap-foto').value.trim();var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:foto||null});
+    var fotoUrl=null;
+    var fileInput=document.getElementById('ap-foto-input');
+    if(fileInput&&fileInput.files&&fileInput.files[0]){
+      var file=fileInput.files[0];
+      if(file.size>5*1024*1024){showToast('La foto no puede superar 5 MB',false);hideLoading();return;}
+      var nombre2=Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      var resS=await fetch(SB_URL+'/storage/v1/object/profesionales/'+nombre2,{
+        method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type},
+        body:file
+      });
+      if(resS.ok) fotoUrl=SB_URL+'/storage/v1/object/public/profesionales/'+nombre2;
+    }
+    var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:fotoUrl});
     profesionales.push(data[0]);
     toggleAddProfesional();
     renderProfesionales();
