@@ -302,7 +302,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <button class="tab" onclick="goTab('t-resenas',this)">Rese&#241;as</button>
     <button class="tab" onclick="goTab('t-servicios',this)">Servicios</button>
     <button class="tab" onclick="goTab('t-horarios',this)">Horarios</button>
-    <button class="tab" onclick="goTab('t-pagos',this)">Pagos</button>
+
     <button class="tab" onclick="goTab('t-stats',this)">Stats</button>
     <button class="tab" onclick="goTab('t-exportar',this)">Exportar</button>
     <button class="tab" onclick="goTab('t-profesionales',this)">Profesionales</button>
@@ -422,30 +422,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <button class="btn-main" onclick="guardarHorarios()">Guardar horarios</button>
   </div>
 
-  <!-- PAGOS -->
-  <div class="sec" id="t-pagos">
-    <div class="sec-hd"><h2>M&#233;todos de pago</h2></div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Activ&#225; los m&#233;todos que quer&#233;s mostrar en la p&#225;gina del cliente.</p>
-    <div class="card">
-      <div class="card-title">M&#233;todos disponibles</div>
-      <div id="metodos-list"></div>
-      <button class="btn-add" style="margin-top:10px;" onclick="toggleAddMetodo()">+ Agregar m&#233;todo</button>
-      <div class="add-form" id="add-metodo-form">
-        <h4>Nuevo m&#233;todo</h4>
-        <div class="fg"><label>Nombre</label><input id="cm-nombre" type="text" placeholder="Ej: Uala" maxlength="40"/></div>
-        <div class="fg"><label>Descripci&#243;n</label><input id="cm-desc" type="text" placeholder="Ej: Billetera virtual" maxlength="50"/></div>
-        <div class="fg"><label>&#205;cono (emoji)</label>
-          <div class="icono-grid" id="icono-grid"></div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-sec" onclick="toggleAddMetodo()">Cancelar</button>
-          <button class="btn-main" style="flex:1;" onclick="agregarMetodo()">Guardar</button>
-        </div>
-      </div>
-    </div>
-    <button class="btn-main" onclick="guardarMetodos()">Guardar m&#233;todos de pago</button>
-  </div>
-
   <!-- STATS -->
   <div class="sec" id="t-stats">
     <div class="sec-hd"><h2>Estad&#237;sticas</h2></div>
@@ -505,7 +481,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
         <div onclick="document.getElementById('ap-foto-input').click()" style="border:1.5px dashed var(--g3);border-radius:10px;padding:14px;text-align:center;cursor:pointer;background:#fff;">
           <div style="font-size:22px;">📷</div>
           <div style="font-size:12px;font-weight:500;color:var(--g2);margin-top:4px;" id="ap-foto-txt">Elegir foto</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG — máx 5 MB</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">JPG, PNG — máx 3 MB</div>
         </div>
         <input type="file" id="ap-foto-input" accept="image/*" style="display:none;" onchange="prevFotoProfesional(this)"/>
       </div>
@@ -1400,7 +1376,7 @@ function toggleAddUsuario(){
 function prevFotoProfesional(input){
   if(!input.files||!input.files[0]) return;
   var file=input.files[0];
-  if(file.size>5*1024*1024){showToast('La foto no puede superar 5 MB',false);input.value='';return;}
+
   var reader=new FileReader();
   reader.onload=function(e){
     document.getElementById('ap-foto-img').src=e.target.result;
@@ -1419,13 +1395,19 @@ async function agregarProfesional(){
     var fileInput=document.getElementById('ap-foto-input');
     if(fileInput&&fileInput.files&&fileInput.files[0]){
       var file=fileInput.files[0];
-      if(file.size>5*1024*1024){showToast('La foto no puede superar 5 MB',false);hideLoading();return;}
+      if(file.size>3*1024*1024){showToast('La foto no puede superar 3 MB',false);hideLoading();return;}
       var nombre2=Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
       var resS=await fetch(SB_URL+'/storage/v1/object/profesionales/'+nombre2,{
         method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type},
         body:file
       });
-      if(resS.ok) fotoUrl=SB_URL+'/storage/v1/object/public/profesionales/'+nombre2;
+      if(resS.ok){
+        fotoUrl=SB_URL+'/storage/v1/object/public/profesionales/'+nombre2;
+      } else {
+        var errBody=await resS.json().catch(function(){return{};});
+        showToast('Error al subir foto: '+(errBody.message||errBody.error||'Status '+resS.status),false);
+        hideLoading();return;
+      }
     }
     var data=await sbPost('profesionales',{nombre:nombre,activo:true,foto_url:fotoUrl});
     profesionales.push(data[0]);
