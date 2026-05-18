@@ -1397,12 +1397,12 @@ async function agregarProfesional(){
       var file=fileInput.files[0];
       if(file.size>3*1024*1024){showToast('La foto no puede superar 3 MB',false);hideLoading();return;}
       var nombre2=Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      var resS=await fetch(SB_URL+'/storage/v1/object/profesionales/'+nombre2,{
+      var resS=await fetch(SB_URL+'/storage/v1/object/Profesionales/'+nombre2,{
         method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':file.type},
         body:file
       });
       if(resS.ok){
-        fotoUrl=SB_URL+'/storage/v1/object/public/profesionales/'+nombre2;
+        fotoUrl=SB_URL+'/storage/v1/object/public/Profesionales/'+nombre2;
       } else {
         var errBody=await resS.json().catch(function(){return{};});
         showToast('Error al subir foto: '+(errBody.message||errBody.error||'Status '+resS.status),false);
