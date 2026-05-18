@@ -35,17 +35,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
 .login-loading{display:none;text-align:center;padding:8px;font-size:13px;color:var(--muted);}
 #panel{display:none;}
 /* TOPBAR */
-.topbar{background:linear-gradient(135deg,var(--g1),var(--g2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.tb-left h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#fff;}
-.tb-left p{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
-.ing-hoy strong{display:block;font-size:18px;font-weight:600;color:#fff;text-align:right;}
-.ing-hoy span{font-size:10px;color:rgba(255,255,255,0.6);}
-.btn-logout{background:rgba(255,255,255,0.12);border:0.5px solid rgba(255,255,255,0.2);color:#fff;padding:7px 12px;border-radius:100px;font-size:12px;font-family:inherit;cursor:pointer;margin-left:10px;}
+.topbar{background:linear-gradient(135deg,var(--g1) 0%,#1e5c40 60%,var(--g2) 100%);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 20px rgba(27,67,50,0.35);}
+.tb-left h1{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;}
+.tb-left p{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.01em;}
+.ing-hoy{text-align:right;}
+.ing-hoy strong{display:block;font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.03em;line-height:1;}
+.ing-hoy span{font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.06em;}
+.btn-logout{background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.8);padding:7px 14px;border-radius:100px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;margin-left:12px;transition:background 0.2s;}
+.btn-logout:hover{background:rgba(255,255,255,0.18);}
 /* METRICS */
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:var(--bg);}
-.met{background:#fff;border-radius:10px;padding:12px 8px;text-align:center;border:0.5px solid var(--border);}
-.met .mv{font-size:20px;font-weight:600;}
-.met .ml{font-size:10px;color:var(--muted);margin-top:2px;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px;background:linear-gradient(180deg,var(--g1) 0%,var(--bg) 60%);padding-bottom:4px;}
+.met{background:rgba(255,255,255,0.96);border-radius:14px;padding:14px 10px 12px;text-align:center;border:none;box-shadow:0 2px 12px rgba(27,67,50,0.1),0 0 0 0.5px rgba(45,106,79,0.08);position:relative;overflow:hidden;}
+.met::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.met:nth-child(1)::before{background:linear-gradient(90deg,var(--g2),var(--g3));}
+.met:nth-child(2)::before{background:linear-gradient(90deg,var(--acc2),var(--acc));}
+.met:nth-child(3)::before{background:linear-gradient(90deg,var(--pur),#A89EF5);}
+.met:nth-child(4)::before{background:linear-gradient(90deg,var(--blue),#64B3F4);}
+.met .mv{font-size:22px;font-weight:700;letter-spacing:-0.02em;line-height:1.1;}
+.met .ml{font-size:9px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;font-weight:500;}
 .mv-g{color:var(--g2);}
 .mv-a{color:var(--acc2);}
 .mv-p{color:var(--pur);}
@@ -169,20 +176,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
 .icono-opt{width:100%;aspect-ratio:1;border:0.5px solid var(--border);border-radius:8px;background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .icono-opt.sel-ic{border-color:var(--g2);background:var(--g5);}
 /* STATS */
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
-.sc{background:#fff;border:0.5px solid var(--border);border-radius:12px;padding:12px;}
-.sc .sl{font-size:11px;color:var(--muted);margin-bottom:4px;}
-.sc .sv{font-size:20px;font-weight:600;}
-.br-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
-.br-lbl{font-size:12px;color:var(--muted);width:90px;flex-shrink:0;}
-.br-track{flex:1;height:9px;background:var(--bg);border-radius:5px;overflow:hidden;border:0.5px solid var(--border);}
-.br-fill{height:100%;border-radius:5px;transition:width 0.7s ease;}
-.br-n{font-size:12px;font-weight:500;width:16px;text-align:right;}
-.hist-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
+.stats-hero{background:linear-gradient(135deg,var(--g1),#1e5c40,var(--g2));border-radius:18px;padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;}
+.stats-hero::before{content:'';position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(82,183,136,0.1);top:-60px;right:-40px;}
+.stats-hero::after{content:'';position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(244,162,97,0.08);bottom:-30px;left:20px;}
+.stats-hero-lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:4px;}
+.stats-hero-val{font-size:36px;font-weight:700;color:#fff;letter-spacing:-0.04em;line-height:1;}
+.stats-hero-sub{font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;}
+.stats-hero-row{display:flex;gap:16px;margin-top:16px;padding-top:16px;border-top:0.5px solid rgba(255,255,255,0.1);}
+.stats-hero-item{flex:1;}
+.stats-hero-item .shi-val{font-size:16px;font-weight:600;color:#fff;}
+.stats-hero-item .shi-lbl{font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px;text-transform:uppercase;letter-spacing:0.05em;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.sc{background:#fff;border:none;box-shadow:0 1px 8px rgba(27,67,50,0.07),0 0 0 0.5px rgba(45,106,79,0.07);border-radius:16px;padding:16px;position:relative;overflow:hidden;}
+.sc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 16px 16px;}
+.sc:nth-child(1)::after,.sc:nth-child(3)::after,.sc:nth-child(5)::after{background:linear-gradient(90deg,var(--g3),var(--g4));}
+.sc:nth-child(2)::after,.sc:nth-child(4)::after,.sc:nth-child(6)::after{background:linear-gradient(90deg,var(--acc2),var(--acc));}
+.sc .sl{font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;}
+.sc .sv{font-size:24px;font-weight:700;letter-spacing:-0.03em;line-height:1;}
+.br-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.br-lbl{font-size:12px;color:var(--muted);width:90px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.br-track{flex:1;height:8px;background:var(--g5);border-radius:100px;overflow:hidden;}
+.br-fill{height:100%;border-radius:100px;transition:width 0.9s cubic-bezier(0.4,0,0.2,1);}
+.br-n{font-size:12px;font-weight:600;width:18px;text-align:right;color:var(--txt);}
+.hist-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:12px;}
 .hist-row:last-child{border-bottom:none;}
 .hd{color:var(--muted);width:52px;flex-shrink:0;}
 .hs{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hp{color:var(--g2);flex-shrink:0;}
+.hp{color:var(--g2);flex-shrink:0;font-weight:600;}
 /* EXPORTAR */
 .exp-filters{background:var(--bg);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
 .exp-filters h4{font-size:13px;font-weight:500;margin-bottom:12px;}
@@ -281,18 +301,29 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
     <div class="tb-left">
       <h1 id="tp-nombre">Panel del local</h1>
       <p id="tp-fecha"></p>
-      <p id="tp-hora" style="font-size:13px;color:rgba(255,255,255,0.7);margin:0;"></p>
     </div>
-    <div style="display:flex;align-items:center;">
+    <div style="display:flex;align-items:center;gap:4px;">
       <div class="ing-hoy"><strong id="tp-ing">$0</strong><span>hoy</span></div>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
   <div class="metrics">
-    <div class="met"><div class="mv mv-g" id="m-hoy">0</div><div class="ml">hoy</div></div>
-    <div class="met"><div class="mv mv-a" id="m-sem">0</div><div class="ml">semana</div></div>
-    <div class="met"><div class="mv mv-p" id="m-cli">0</div><div class="ml">clientes</div></div>
-    <div class="met"><div class="mv mv-b" id="m-tot">0</div><div class="ml">total</div></div>
+    <div class="met">
+      <div class="mv mv-g" id="m-hoy">0</div>
+      <div class="ml">Hoy</div>
+    </div>
+    <div class="met">
+      <div class="mv mv-a" id="m-sem">0</div>
+      <div class="ml">Semana</div>
+    </div>
+    <div class="met">
+      <div class="mv mv-p" id="m-cli">0</div>
+      <div class="ml">Clientes</div>
+    </div>
+    <div class="met">
+      <div class="mv mv-b" id="m-tot">0</div>
+      <div class="ml">Total</div>
+    </div>
   </div>
   <div class="tabs">
     <button class="tab active" onclick="goTab('t-hoy',this)">Hoy</button>
@@ -425,18 +456,44 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
   <!-- STATS -->
   <div class="sec" id="t-stats">
     <div class="sec-hd"><h2>Estad&#237;sticas</h2></div>
+
+    <!-- Hero card ingresos totales -->
+    <div class="stats-hero">
+      <div class="stats-hero-lbl">Ingresos estimados totales</div>
+      <div class="stats-hero-val" id="st-ing">$0</div>
+      <div class="stats-hero-sub">Basado en turnos confirmados</div>
+      <div class="stats-hero-row">
+        <div class="stats-hero-item">
+          <div class="shi-val" id="st-ing-mes">$0</div>
+          <div class="shi-lbl">Este mes</div>
+        </div>
+        <div class="stats-hero-item">
+          <div class="shi-val" id="st-ing-sem">$0</div>
+          <div class="shi-lbl">Esta semana</div>
+        </div>
+        <div class="stats-hero-item">
+          <div class="shi-val" id="st-avg">$0</div>
+          <div class="shi-lbl">Ticket prom.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de métricas -->
     <div class="sg">
       <div class="sc"><div class="sl">Total turnos</div><div class="sv mv-g" id="st-tot">0</div></div>
-      <div class="sc"><div class="sl">Ingresos est.</div><div class="sv mv-a" id="st-ing">$0</div></div>
-      <div class="sc"><div class="sl">Turnos semana</div><div class="sv mv-g" id="st-t-sem">0</div></div>
-      <div class="sc"><div class="sl">Ing. esta semana</div><div class="sv mv-a" id="st-ing-sem">$0</div></div>
-      <div class="sc"><div class="sl">Turnos mes</div><div class="sv mv-g" id="st-t-mes">0</div></div>
-      <div class="sc"><div class="sl">Ing. este mes</div><div class="sv mv-a" id="st-ing-mes">$0</div></div>
-      <div class="sc"><div class="sl">Clientes &#250;nicos</div><div class="sv mv-p" id="st-cli">0</div></div>
-      <div class="sc"><div class="sl">Ticket promedio</div><div class="sv mv-b" id="st-avg">$0</div></div>
+      <div class="sc"><div class="sl">Clientes &#250;nicos</div><div class="sv mv-a" id="st-cli">0</div></div>
+      <div class="sc"><div class="sl">Turnos este mes</div><div class="sv mv-g" id="st-t-mes">0</div></div>
+      <div class="sc"><div class="sl">Turnos esta semana</div><div class="sv mv-a" id="st-t-sem">0</div></div>
     </div>
-    <div class="card"><p style="font-size:13px;font-weight:500;margin-bottom:10px;">Servicios m&#225;s solicitados</p><div id="st-bars"></div></div>
-    <div class="card"><p style="font-size:13px;font-weight:500;margin-bottom:10px;">Historial reciente</p><div id="st-hist"></div></div>
+
+    <div class="card">
+      <p style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:14px;letter-spacing:-0.01em;">&#128202; Servicios m&#225;s solicitados</p>
+      <div id="st-bars"></div>
+    </div>
+    <div class="card">
+      <p style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:14px;letter-spacing:-0.01em;">&#128336; Historial reciente</p>
+      <div id="st-hist"></div>
+    </div>
   </div>
 
   <!-- EXPORTAR -->
@@ -662,15 +719,15 @@ async function sbUpsert(tabla,datos,onConflict){
 /* ==========================================
    UTILS
    ========================================== */
-var TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
+var TODAY=new Date().toISOString().split('T')[0];
 var DIAS_N=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
 var FILLS=['#52B788','#7F77DD','#F4A261','#378ADD'];
 var AV_COLS=['av-g','av-p','av-a'];
 
 function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
 function numSafe(v,d){var n=parseInt(v);return(isNaN(n)||n<0)?d:n;}
-function fmtFecha(s){if(!s||typeof s!=='string'||s.length<10)return s||'';try{var p=s.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));return d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s||'';}}
-function addDays(s,n){if(!s)return s;var p=s.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtFecha(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s||'';}}
+function addDays(s,n){var d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
 
 function showLoading(txt){
   document.getElementById('loading-txt').textContent=txt||'Cargando...';
@@ -966,17 +1023,15 @@ function fmtPeso(n){
   return '$'+Math.round(n).toLocaleString('es-AR');
 }
 
-function toLD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-
 function updateMetrics(){
   var act=turnos.filter(function(t){return t.estado==='confirmado';});
   var hoy=act.filter(function(t){return t.fecha===TODAY;});
-  var p=TODAY.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
+  var d=new Date(TODAY);
   var dow=d.getDay();var diff=dow===0?-6:1-dow;
   var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
   var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
-  var lunesStr=toLD(lunes);
-  var domingoStr=toLD(domingo);
+  var lunesStr=lunes.toISOString().slice(0,10);
+  var domingoStr=domingo.toISOString().slice(0,10);
   var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
   var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
   document.getElementById('m-hoy').textContent=hoy.length;
@@ -1641,12 +1696,12 @@ function renderStats(){
   var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
 
   /* Semana actual (lunes a domingo) */
-  var p2=TODAY.split('-');var d=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
+  var d=new Date(TODAY);
   var dow=d.getDay();var diff=dow===0?-6:1-dow;
   var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
   var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
-  var lunesStr=toLD(lunes);
-  var domingoStr=toLD(domingo);
+  var lunesStr=lunes.toISOString().slice(0,10);
+  var domingoStr=domingo.toISOString().slice(0,10);
   var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
 
   /* Mes actual */
