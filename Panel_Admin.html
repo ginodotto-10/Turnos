@@ -662,15 +662,15 @@ async function sbUpsert(tabla,datos,onConflict){
 /* ==========================================
    UTILS
    ========================================== */
-var TODAY=new Date().toISOString().split('T')[0];
+var TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
 var DIAS_N=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
 var FILLS=['#52B788','#7F77DD','#F4A261','#378ADD'];
 var AV_COLS=['av-g','av-p','av-a'];
 
 function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
 function numSafe(v,d){var n=parseInt(v);return(isNaN(n)||n<0)?d:n;}
-function fmtFecha(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s||'';}}
-function addDays(s,n){var d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function fmtFecha(s){if(!s||typeof s!=='string'||s.length<10)return s||'';try{var p=s.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));return d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s||'';}}
+function addDays(s,n){if(!s)return s;var p=s.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 function showLoading(txt){
   document.getElementById('loading-txt').textContent=txt||'Cargando...';
@@ -966,15 +966,17 @@ function fmtPeso(n){
   return '$'+Math.round(n).toLocaleString('es-AR');
 }
 
+function toLD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
 function updateMetrics(){
   var act=turnos.filter(function(t){return t.estado==='confirmado';});
   var hoy=act.filter(function(t){return t.fecha===TODAY;});
-  var d=new Date(TODAY);
+  var p=TODAY.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));
   var dow=d.getDay();var diff=dow===0?-6:1-dow;
   var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
   var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
-  var lunesStr=lunes.toISOString().slice(0,10);
-  var domingoStr=domingo.toISOString().slice(0,10);
+  var lunesStr=toLD(lunes);
+  var domingoStr=toLD(domingo);
   var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
   var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
   document.getElementById('m-hoy').textContent=hoy.length;
@@ -1639,12 +1641,12 @@ function renderStats(){
   var seen=new Set(act.map(function(t){return t.cliente_id||t.tel;}));
 
   /* Semana actual (lunes a domingo) */
-  var d=new Date(TODAY);
+  var p2=TODAY.split('-');var d=new Date(parseInt(p2[0]),parseInt(p2[1])-1,parseInt(p2[2]));
   var dow=d.getDay();var diff=dow===0?-6:1-dow;
   var lunes=new Date(d);lunes.setDate(d.getDate()+diff);
   var domingo=new Date(lunes);domingo.setDate(lunes.getDate()+6);
-  var lunesStr=lunes.toISOString().slice(0,10);
-  var domingoStr=domingo.toISOString().slice(0,10);
+  var lunesStr=toLD(lunes);
+  var domingoStr=toLD(domingo);
   var sem=act.filter(function(t){return t.fecha>=lunesStr&&t.fecha<=domingoStr;});
 
   /* Mes actual */

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="color-scheme" content="light only"/>
 <meta name="description" content="Reservá tu turno online"/>
 <title>Reservar turno - Est&#233;tica &amp; Bienestar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -11,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
+html{color-scheme:light only;}
 :root{--g1:#1B4332;--g2:#2D6A4F;--g3:#52B788;--g4:#95D5B2;--g5:#D8F3DC;--acc:#F4A261;--bg:#F4F7F5;--white:#fff;--txt:#1A2E22;--muted:#5A7A65;--border:rgba(45,106,79,0.12);}
 html{scroll-behavior:smooth;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;-webkit-text-size-adjust:100%;}
@@ -88,7 +90,7 @@ nav{background:var(--g1);padding:14px 20px;display:flex;align-items:center;gap:1
 /* FORM */
 .fg{margin-bottom:13px;}
 .fg label{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
-.fg input{width:100%;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;}
+.fg input{width:100%;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;font-size:16px;font-family:inherit;background:var(--bg);color:var(--txt);-webkit-appearance:none;appearance:none;}
 .fg input:focus{outline:none;border-color:var(--g3);}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 /* BOTONES */
@@ -242,14 +244,33 @@ async function sbPost(t,d){
   return r.json();
 }
 function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
-function fmtF(s){try{return new Date(s+'T00:00:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s;}}
+function toLocalDate(d){var y=d.getFullYear();var m=String(d.getMonth()+1).padStart(2,'0');var dd=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+dd;}
+function fmtF(s){if(!s||typeof s!=='string'||s.length<10)return s||'';try{var p=s.split('-');var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));return d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});}catch(e){return s;}}
 
-var TODAY=new Date().toISOString().split('T')[0];
+var TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
 var DIAS=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
 var cWeekOff=0,cSelDate='',cSelSlot='',cSelSrv=null,cSelProf=null,lastT=null;
 var servicios=[],turnosOcupados=[],telNegocio='';
 var feriadosFechas=[];
 var profesionales=[];
+var horariosConfig={diasActivos:[1,2,3,4,5,6],franjas:[{desde:'09:00',hasta:'12:00'},{desde:'14:00',hasta:'19:00'}],durTurno:30,feriados:[]};
+
+function generarSlots(){
+  var slots=[];
+  var dur=horariosConfig.durTurno||30;
+  (horariosConfig.franjas||[]).forEach(function(f){
+    var parts=f.desde.split(':');var h=parseInt(parts[0]);var m=parseInt(parts[1]);
+    var parts2=f.hasta.split(':');var eh=parseInt(parts2[0]);var em=parseInt(parts2[1]);
+    var cur=h*60+m;var end=eh*60+em;
+    while(cur+dur<=end){
+      var hh=String(Math.floor(cur/60)).padStart(2,'0');
+      var mm=String(cur%60).padStart(2,'0');
+      slots.push(hh+':'+mm);
+      cur+=dur;
+    }
+  });
+  return slots;
+}
 
 async function initApp(){
   try {
@@ -269,6 +290,7 @@ async function initApp(){
     if(cfg.horarios_config){
       try{
         var hc=JSON.parse(cfg.horarios_config);
+        horariosConfig=hc;
         if(hc.feriados) feriadosFechas=hc.feriados.map(function(f){return f.fecha;});
       }catch(e){}
     }
@@ -294,7 +316,7 @@ async function initApp(){
 
     renderCWeek();
     var days=cGetWeek();
-    await cargarOcupados(new Date(days[0]).toISOString().split('T')[0],new Date(days[6]).toISOString().split('T')[0]);
+    await cargarOcupados(toLocalDate(new Date(days[0])),toLocalDate(new Date(days[6])));
   } catch(e){console.error('Error iniciando:', e);}
   var pl=document.getElementById('page-loading');
   if(pl){pl.classList.add('hide');setTimeout(function(){pl.style.display='none';},400);}
@@ -324,7 +346,7 @@ function renderSrvGrid(){
 }
 
 function cGetWeek(){
-  var base=new Date(TODAY+'T00:00:00');
+  var base=new Date(TODAY+'T12:00:00');
   var mon=new Date(base);mon.setDate(base.getDate()-base.getDay()+1+cWeekOff*7);
   return Array.from({length:7},function(_,i){var d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
 }
@@ -335,13 +357,19 @@ function renderCWeek(){
   document.getElementById('c-week-lbl').textContent=f.toLocaleDateString('es-AR',{day:'numeric',month:'short'})+' - '+l.toLocaleDateString('es-AR',{day:'numeric',month:'short'});
   var row=document.getElementById('c-wk-row');row.innerHTML='';
   days.forEach(function(d){
-    var ds=d.toISOString().split('T')[0];
+    var ds=toLocalDate(d);
     var isPast=ds<TODAY;
     var isFeriado=feriadosFechas.indexOf(ds)>=0;
-    var bloqueado=isPast||isFeriado;
+    var isInactivo=horariosConfig.diasActivos&&horariosConfig.diasActivos.indexOf(d.getDay())<0;
+    var bloqueado=isPast||isFeriado||isInactivo;
     var haT=turnosOcupados.some(function(t){return t.fecha===ds;});
     var div=document.createElement('div');
-    div.className='wk-day'+(isPast&&!isFeriado?' past':'')+(isFeriado?' feriado':'')+(ds===TODAY?' today':'')+(ds===cSelDate?' sel-day':'')+(haT&&!bloqueado?' has-t':'');
+    div.className='wk-day'
+      +((isPast&&!isFeriado)||isInactivo?' past':'')
+      +(isFeriado?' feriado':'')
+      +(ds===TODAY?' today':'')
+      +(ds===cSelDate?' sel-day':'')
+      +(haT&&!bloqueado?' has-t':'');
     div.innerHTML='<div class="dn" translate="no">'+san(DIAS[d.getDay()])+'</div><div class="dd">'+parseInt(d.getDate())+'</div>'+(isFeriado?'<span class="feriado-lbl" translate="no">FERIADO</span>':'');
     if(!bloqueado) div.onclick=function(){cSelDate=ds;cSelSlot='';document.getElementById('btn-s3-cal').disabled=true;renderCWeek();renderCSlots();};
     row.appendChild(div);
@@ -349,18 +377,21 @@ function renderCWeek(){
 }
 
 function renderCSlots(){
-  var SLOTS=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+  var SLOTS=generarSlots();
   var occ=turnosOcupados.filter(function(t){return t.fecha===cSelDate;}).map(function(t){return t.hora;});
-  document.getElementById('c-slots-lbl').textContent=cSelDate?'Horarios disponibles - '+fmtF(cSelDate):'Selecci\u00f3n un d\u00eda para ver horarios';
+  document.getElementById('c-slots-lbl').textContent=cSelDate?'Horarios disponibles - '+fmtF(cSelDate):'Seleccion\u00e1 un d\u00eda para ver horarios';
   var wrap=document.getElementById('c-slots');wrap.innerHTML='';
+  if(!cSelDate){return;}
   var now=new Date();
   var horaActual=now.getHours()*60+now.getMinutes();
+  var alguno=false;
   SLOTS.forEach(function(s){
     if(cSelDate===TODAY){
       var partes=s.split(':');
       var slotMin=parseInt(partes[0])*60+parseInt(partes[1]);
       if(slotMin<=horaActual) return;
     }
+    alguno=true;
     var o=occ.includes(s);
     var div=document.createElement('div');
     div.className='slot'+(o?' occ':'')+(s===cSelSlot?' sel-slot':'');
@@ -368,12 +399,15 @@ function renderCSlots(){
     if(!o) div.onclick=function(){cSelSlot=s;renderCSlots();document.getElementById('btn-s3-cal').disabled=false;};
     wrap.appendChild(div);
   });
+  if(!alguno){
+    wrap.innerHTML='<div style="grid-column:span 4;text-align:center;color:var(--muted);font-size:13px;padding:12px;">No hay horarios disponibles para este d\u00eda.</div>';
+  }
 }
 
 async function cChangeWeek(d){
   cWeekOff+=d;renderCWeek();renderCSlots();
   var days=cGetWeek();
-  await cargarOcupados(new Date(days[0]).toISOString().split('T')[0],new Date(days[6]).toISOString().split('T')[0]);
+  await cargarOcupados(toLocalDate(new Date(days[0])),toLocalDate(new Date(days[6])));
 }
 
 function goStep(n){

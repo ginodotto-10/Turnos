@@ -98,7 +98,7 @@ section{padding:56px 24px;}
 .form-card h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#fff;margin-bottom:18px;}
 .fg{margin-bottom:13px;}
 .fg label{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,0.58);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
-.fg input,.fg select{width:100%;padding:11px 13px;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;font-size:14px;color:#fff;font-family:inherit;-webkit-appearance:none;}
+.fg input,.fg select{width:100%;padding:11px 13px;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;font-size:16px;color:#fff;font-family:inherit;-webkit-appearance:none;appearance:none;}
 .fg input::placeholder{color:rgba(255,255,255,0.38);}
 .fg select option{background:var(--g2);color:#fff;}
 .fg input:focus,.fg select:focus{outline:none;border-color:var(--g4);}
@@ -295,8 +295,8 @@ footer{background:var(--g1);padding:36px 24px 28px;text-align:center;}
       <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;">&#128172; Dej&#225; tu rese&#241;a</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:16px;">Tu opini&#243;n nos ayuda a mejorar</div>
       <div id="rev-form-wrap">
-        <input id="rev-nombre" type="text" maxlength="50" placeholder="Tu nombre" style="width:100%;background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:11px 14px;color:#1a1a1a;font-size:14px;font-family:inherit;margin-bottom:10px;outline:none;"/>
-        <textarea id="rev-texto" maxlength="200" placeholder="Cont&#225;nos tu experiencia..." rows="3" style="width:100%;background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:11px 14px;color:#1a1a1a;font-size:14px;font-family:inherit;resize:none;margin-bottom:10px;outline:none;"></textarea>
+        <input id="rev-nombre" type="text" maxlength="50" placeholder="Tu nombre" style="width:100%;background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:11px 14px;color:#1a1a1a;font-size:16px;font-family:inherit;margin-bottom:10px;outline:none;-webkit-appearance:none;appearance:none;"/>
+        <textarea id="rev-texto" maxlength="200" placeholder="Cont&#225;nos tu experiencia..." rows="3" style="width:100%;background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.3);border-radius:10px;padding:11px 14px;color:#1a1a1a;font-size:16px;font-family:inherit;resize:none;margin-bottom:10px;outline:none;-webkit-appearance:none;appearance:none;"></textarea>
         <div style="margin-bottom:14px;">
           <div style="font-size:12px;color:rgba(255,255,255,0.9);font-weight:500;margin-bottom:6px;">Puntuaci&#243;n</div>
           <div id="rev-stars-input" style="display:flex;gap:6px;">
@@ -341,7 +341,6 @@ footer{background:var(--g1);padding:36px 24px 28px;text-align:center;}
     <a href="#servicios">Servicios</a>
     <a href="#galeria">Galer&#237;a</a>
     <a href="turno.html">Reservar</a>
-    <a href="#pagos">Pagos</a>
     <a href="#contacto">Contacto</a>
   </div>
   <p class="foot-copy">&copy; 2026 Est&#233;tica &amp; Bienestar. Todos los derechos reservados.</p>
@@ -361,7 +360,12 @@ async function sbGet(t,f){
   return r.json();
 }
 function san(s){if(typeof s!=='string')return '';return s.replace(/[<>"'&]/g,function(c){return{'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c];});}
-function ir(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth'});}
+function ir(id){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var y=el.getBoundingClientRect().top+window.pageYOffset-60;
+  window.scrollTo({top:y,behavior:'smooth'});
+}
 
 /* ========================
    CARRUSEL GALERIA — con touch/swipe
@@ -486,14 +490,16 @@ function addSwipe(wrap,track,onNext,onPrev,idxGetter){
     track.style.transform='translateX(-'+pct+'%)';
   },{passive:false});
 
-  wrap.addEventListener('touchend',function(){
+  function endSwipe(){
     if(!dragging)return;
     dragging=false;
     track.style.transition='';
     if(dx<-50) onNext();
     else if(dx>50) onPrev();
     else track.style.transform='translateX(-'+(idxGetter()*100)+'%)';
-  });
+  }
+  wrap.addEventListener('touchend',endSwipe,{passive:true});
+  wrap.addEventListener('touchcancel',endSwipe,{passive:true});
 }
 
 
