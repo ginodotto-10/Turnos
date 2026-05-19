@@ -215,6 +215,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
 .exp-title{font-size:14px;font-weight:500;margin-bottom:2px;}
 .exp-sub{font-size:12px;color:var(--muted);}
 .exp-arrow{font-size:18px;color:var(--muted);flex-shrink:0;margin-left:auto;}
+/* TRIAL VENCIDO */
+.trial-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:24px;}
+.trial-overlay.open{display:flex;}
+.trial-box{background:#fff;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.trial-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#FAEEDA,#F4A261);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 18px;}
+.trial-box h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--txt);margin-bottom:8px;}
+.trial-box p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.trial-contact{background:var(--g5);border-radius:14px;padding:16px;margin-bottom:0;}
+.trial-contact p{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em;}
+.trial-contact a{display:block;font-size:18px;font-weight:700;color:var(--g1);text-decoration:none;letter-spacing:0.01em;}
+.trial-contact .trial-name{font-size:15px;font-weight:600;color:var(--g2);margin-top:4px;}
 /* CONFIG */
 .cfg-preview{background:var(--g5);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--g1);margin-top:4px;}
 .cfg-pass-msg{display:none;font-size:12px;padding:8px 12px;border-radius:8px;margin-bottom:10px;}
@@ -650,6 +661,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overfl
   </div>
 </div>
 
+<!-- TRIAL VENCIDO -->
+<div class="trial-overlay" id="trial-overlay">
+  <div class="trial-box">
+    <div class="trial-icon">⏰</div>
+    <h2>Tu período de prueba ha vencido</h2>
+    <p>Los <strong>14 días gratuitos</strong> de prueba llegaron a su fin.<br>Para seguir usando el sistema, contactate para adquirir tu licencia.</p>
+    <div class="trial-contact">
+      <p>Contactate con</p>
+      <div class="trial-name" id="trial-contact-name"></div>
+      <a id="trial-contact-tel" href="#" style="color:var(--g1);font-size:20px;font-weight:700;text-decoration:none;margin-top:4px;display:block;"></a>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CLIENTE -->
 <div class="modal-bg" id="mod-c">
   <div class="modal">
@@ -900,6 +925,7 @@ async function initPanel(){
     ]);
     renderHoy();
     updateMetrics();
+    await verificarTrial();
   } catch(e){
     showToast('Error cargando datos: '+e.message, false);
   }
@@ -2016,7 +2042,49 @@ async function cambiarEstadoResena(id,estado){
 }
 
 
-var supabaseClient=null;
+/* ==========================================
+   TRIAL / PRUEBA GRATUITA
+   ========================================== */
+/* Datos de contacto del vendedor — editá acá */
+var TRIAL_CONTACTO_NOMBRE = 'Gino Dotto';
+var TRIAL_CONTACTO_TEL    = '3468 415860';
+
+async function verificarTrial(){
+  try {
+    /* Busca el registro de trial del usuario actual (por usuario_id o usuario) */
+    var data = await sbGet('trial', 'usuario=eq.'+encodeURIComponent(sesion.usuario)+'&limit=1');
+    if(!data || data.length === 0){
+      /* Si no existe registro de trial, no bloquea */
+      return;
+    }
+    var t = data[0];
+    /* Si tiene licencia activa, no bloquea */
+    if(t.activo === true || t.activo === 1) return;
+
+    var inicio = new Date(t.fecha_inicio);
+    var hoy    = new Date();
+    var diff   = Math.floor((hoy - inicio) / (1000 * 60 * 60 * 24));
+
+    if(diff >= 14){
+      mostrarTrialVencido();
+    }
+  } catch(e){
+    /* Si la tabla no existe o hay error, no bloquea el panel */
+    console.log('Trial check error:', e.message);
+  }
+}
+
+function mostrarTrialVencido(){
+  document.getElementById('trial-contact-name').textContent = TRIAL_CONTACTO_NOMBRE;
+  var telEl = document.getElementById('trial-contact-tel');
+  telEl.textContent = TRIAL_CONTACTO_TEL;
+  /* Limpia el número para el href de tel: */
+  var telLimpio = TRIAL_CONTACTO_TEL.replace(/[^\d+]/g,'');
+  telEl.href = 'tel:' + telLimpio;
+  document.getElementById('trial-overlay').classList.add('open');
+}
+
+
 
 function iniciarRealtime(){
   try {
