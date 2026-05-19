@@ -881,11 +881,10 @@ async function initPanel(){
     var ahora=new Date();
     var hh=String(ahora.getHours()).padStart(2,'0');
     var mm=String(ahora.getMinutes()).padStart(2,'0');
-    var ss=String(ahora.getSeconds()).padStart(2,'0');
-    document.getElementById('tp-fecha').textContent=fmtFecha(TODAY)+' — '+hh+':'+mm+':'+ss;
+    document.getElementById('tp-fecha').textContent=fmtFecha(TODAY)+' — '+hh+':'+mm;
   }
   actualizarHora();
-  setInterval(actualizarHora,1000);
+  setInterval(actualizarHora,60000);
   document.getElementById('exp-desde').value=TODAY;
   document.getElementById('exp-hasta').value=TODAY;
   try {
